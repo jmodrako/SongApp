@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 26
@@ -50,7 +51,24 @@ dependencies {
     implementation "com.jakewharton.rxbinding2:rxbinding:2.0.0"
     implementation "com.jakewharton.threetenabp:threetenabp:1.0.5"
 
+    testImplementation "junit:junit:4.12"
+    testImplementation("org.jetbrains.spek:spek-api:1.1.2") {
+        exclude group: "org.jetbrains.kotlin"
+    }
+    testImplementation("org.jetbrains.spek:spek-junit-platform-engine:1.1.2") {
+        exclude group: "org.junit.platform"
+        exclude group: "org.jetbrains.kotlin"
+    }
+    testImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    testImplementation "org.junit.platform:junit-platform-runner:1.0.0-M4"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.0.0-M4"
+    testImplementation "org.mockito:mockito-core:2.8.9"
+
     androidTestImplementation("com.android.support.test.espresso:espresso-core:3.0.1", {
         exclude group: "com.android.support", module: "support-annotations"
     })
+}
+
+project.afterEvaluate {
+    lint.dependsOn ktlintCheck
 }
