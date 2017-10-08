@@ -1,6 +1,7 @@
 buildscript {
-    ext.kotlin_version = '1.1.50'
+    ext.kotlin_version = '1.1.51'
     ext.supportLibraryVersion = '26.1.0'
+    ext.gradlePluginVersion = '2.3.3'
 
     repositories {
         maven { url "https://plugins.gradle.org/m2/" }
@@ -9,7 +10,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "com.android.tools.build:gradle:3.0.0-beta7"
+        classpath "com.android.tools.build:gradle:$gradlePluginVersion"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "gradle.plugin.org.jlleitschuh.gradle:ktlint-gradle:2.1.0"
     }

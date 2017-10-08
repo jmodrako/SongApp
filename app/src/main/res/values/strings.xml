@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">SongApp</string>
+    <string name="search_hint">Search…</string>
+    <string name="data_source">Data source</string>
+    <string name="cant_find_song">We can\'t find any song.</string>
+    <string name="something_went_wrong">Something went wrong…</string>
+    <string name="type_query_to_find_song">Type query and results\nwill be listed here.</string>
 </resources>

@@ -3,8 +3,12 @@ package com.tooploox.songapp.data
 data class SongModel(
     val title: String,
     val artist: String,
-    val year: String? = null
+    val year: String? = null,
+    val thumbnailUrl: String? = null
 ) {
-    val hasYear
-        get() = year?.isNotBlank()
+    fun artistWithYear(): String = if (year?.isNotBlank() == true) {
+        "$artist ($year)"
+    } else {
+        artist
+    }
 }
