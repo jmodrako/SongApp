@@ -25,6 +25,12 @@ class SearchAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder>() {
         }
     }
 
+    override fun onViewRecycled(holder: BaseViewHolder?) {
+        when (holder) {
+            is SongViewHolder -> holder.clearView()
+        }
+    }
+
     override fun getItemCount() = currentData.size
 
     fun updateData(data: List<SongModel>) {
@@ -34,9 +40,16 @@ class SearchAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder>() {
 
     fun clearData() {
         currentData.clear()
-        notifyDataSetChanged()
     }
 }
 
 sealed class BaseViewHolder(binding: ViewDataBinding) : RecyclerView.ViewHolder(binding.root)
-class SongViewHolder(val songBinding: ListItemSongBinding) : BaseViewHolder(songBinding)
+
+class SongViewHolder(val songBinding: ListItemSongBinding) : BaseViewHolder(songBinding) {
+
+    fun clearView() = songBinding.apply {
+        listItemImage.setImageDrawable(null)
+        listItemTitle.text = ""
+        listItemSubtitle.text = ""
+    }
+}

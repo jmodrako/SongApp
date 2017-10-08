@@ -29,7 +29,6 @@ import com.tooploox.songapp.databinding.ActivitySearchBinding
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import java.util.concurrent.TimeUnit
 
 class SearchActivity : AppCompatActivity(), SearchView {
 
@@ -37,6 +36,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
     private lateinit var binding: ActivitySearchBinding
 
     private val listAdapter by lazy { SearchAdapter(this) }
+    private val settings by lazy { BottomSheetBehavior.from(binding.bottomSheet) }
 
     private val compositeDisposable = CompositeDisposable()
     private var dataSource = DataSourceEnum.REMOTE
@@ -65,6 +65,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
 
     override fun showInitialEmptyView() {
         listAdapter.clearData()
+        listAdapter.notifyDataSetChanged()
         showEmptyLayoutWithMessage(getString(R.string.type_query_to_find_song))
     }
 
@@ -116,18 +117,17 @@ class SearchActivity : AppCompatActivity(), SearchView {
     }
 
     private fun setupSettings() {
-        val bottomBeh = BottomSheetBehavior.from(binding.bottomSheet)
-        bottomBeh.state = BottomSheetBehavior.STATE_HIDDEN
+        settings.state = BottomSheetBehavior.STATE_HIDDEN
 
         binding.settings.click {
-            bottomBeh.state =
-                if (bottomBeh.state != BottomSheetBehavior.STATE_HIDDEN) BottomSheetBehavior.STATE_HIDDEN
+            settings.state =
+                if (settings.state != BottomSheetBehavior.STATE_HIDDEN) BottomSheetBehavior.STATE_HIDDEN
                 else BottomSheetBehavior.STATE_EXPANDED
         }
     }
 
     private fun hideSettings() {
-        BottomSheetBehavior.from(binding.bottomSheet).state = BottomSheetBehavior.STATE_HIDDEN
+        settings.state = BottomSheetBehavior.STATE_HIDDEN
     }
 
     private fun setupSearchDataSourceSpinner() {
@@ -170,16 +170,14 @@ class SearchActivity : AppCompatActivity(), SearchView {
 
         RxTextView.textChanges(binding.searchInput)
             .skip(1)
-            .debounce(350, TimeUnit.MILLISECONDS)
             .map(CharSequence::toString)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
+            .doOnNext {
                 if (it.isEmpty()) binding.clearSearchInput.gone()
                 else binding.clearSearchInput.visible()
-
-                presenter.handleSearchQuery(it, dataSource)
-            })
+            }
+            .subscribe({ presenter.handleSearchQuery(it, dataSource) })
             .addToDisposable(compositeDisposable)
     }
 }

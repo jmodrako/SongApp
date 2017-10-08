@@ -1,30 +1,43 @@
 package com.tooploox.songapp.search
 
 import com.tooploox.songapp.common.BasePresenter
+import com.tooploox.songapp.common.addToDisposable
 import com.tooploox.songapp.data.DataSource
 import com.tooploox.songapp.data.SongModel
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.PublishSubject
+import java.util.concurrent.TimeUnit
 
 enum class DataSourceEnum {
     LOCAL, REMOTE, BOTH
 }
 
+typealias SearchQuery = Pair<DataSourceEnum, String>
+
 class SearchPresenter(
-    val localDataSource: DataSource,
-    val remoteDataSource: DataSource) : BasePresenter<SearchView>() {
+    private val localDataSource: DataSource,
+    private val remoteDataSource: DataSource) : BasePresenter<SearchView>() {
+
+    private val subject = PublishSubject.create<SearchQuery>()
+
+    init {
+        subject
+            .debounce(400, TimeUnit.MILLISECONDS)
+            .switchMap { chooseDataSource(it.first, it.second).toObservable() }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.io())
+            .subscribe({ withView { showSearchResults(it) } }, { withView { showSearchError() } })
+            .addToDisposable(disposables)
+    }
 
     fun handleSearchQuery(query: String, dataSourceEnum: DataSourceEnum) {
         if (query.isEmpty()) {
             withView { showInitialEmptyView() }
         } else {
-            chooseDataSource(dataSourceEnum, query)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe({ withView { showSearchResults(it) } },
-                    { withView { showSearchError() } })
+            subject.onNext(dataSourceEnum to query)
         }
     }
 
