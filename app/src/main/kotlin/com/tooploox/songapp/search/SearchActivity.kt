@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.support.design.widget.BottomSheetBehavior
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.RecyclerView
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -66,6 +67,16 @@ class SearchActivity : AppCompatActivity(), SearchView {
     private val compositeDisposable = CompositeDisposable()
     private var appState = AppState()
 
+    private val adapterDataObserver = object : RecyclerView.AdapterDataObserver() {
+        override fun onChanged() {
+            if (listAdapter.isEmpty()) {
+                showEmptyLayoutWithMessage(getString(R.string.cant_find_song))
+            } else {
+                hideEmptyLayout()
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = bindContentView(R.layout.activity_search)
@@ -90,6 +101,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
     }
 
     override fun onStop() {
+        listAdapter.unregisterAdapterDataObserver(adapterDataObserver)
         presenter.detach()
         compositeDisposable.clear()
         super.onStop()
@@ -283,6 +295,8 @@ class SearchActivity : AppCompatActivity(), SearchView {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupSearchResultsList() {
+        listAdapter.registerAdapterDataObserver(adapterDataObserver)
+
         binding.recyclerView.apply {
             withVerticalManager()
             adapter = listAdapter
