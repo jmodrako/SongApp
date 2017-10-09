@@ -39,33 +39,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 
-enum class SortBy(val visible: Boolean = true) {
-    TITLE, AUTHOR, YEAR, NONE(false)
-}
-
 typealias FilterDefinition = (SongModel) -> Boolean
 typealias SongPredicate = (SongModel, String) -> Boolean
-
-data class AppState(
-    var dataSource: DataSourceEnum = DataSourceEnum.REMOTE,
-    var query: String = "",
-    var sortBy: SortBy = SortBy.NONE,
-    private var filtersMap: MutableMap<String, FilterDefinition> = mutableMapOf()) {
-
-    fun isSortActive() = sortBy != SortBy.NONE
-
-    fun isFilterActive() = filtersMap.isNotEmpty()
-
-    fun registerFilter(filterKey: String, filter: FilterDefinition) {
-        filtersMap[filterKey] = filter
-    }
-
-    fun unregisterFilter(filterKey: String) = filtersMap.remove(filterKey)
-
-    fun clearFilters() = filtersMap.clear()
-
-    fun filtersDefinitions(): MutableCollection<FilterDefinition> = filtersMap.values
-}
 
 class SearchActivity : AppCompatActivity(), SearchView {
 
@@ -80,7 +55,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
     private val allBottomSheets by lazy { listOf(settingsBottomSheet, filterBottomSheet, sortBottomSheet) }
 
     private val compositeDisposable = CompositeDisposable()
-    private var appState = AppState()
+    private var searchState = SearchState.newState()
 
     private val adapterDataObserver = object : RecyclerView.AdapterDataObserver() {
         override fun onChanged() {
@@ -110,7 +85,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
         setupLoadingIndicator()
 
         setupSearchInput()
-        setupSearchDataSourceSpinner()
+        setupSettings()
         setupSearchResultsList()
     }
 
@@ -182,7 +157,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
                 val radioBtn = RadioButton(this).apply {
                     text = it.name.toLowerCase().capitalize()
                     click {
-                        appState.sortBy = it
+                        searchState.sortBy = it
                         refreshListFromSortBy()
                     }
                 }
@@ -195,7 +170,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
                 .filterIsInstance(RadioButton::class.java)
                 .forEach { it.isChecked = false }
 
-            appState.sortBy = SortBy.NONE
+            searchState.sortBy = SortBy.NONE
             refreshListFromSortBy()
 
             hideBottomSheet(sortBottomSheet)
@@ -226,11 +201,11 @@ class SearchActivity : AppCompatActivity(), SearchView {
 
             prepareSpinner(finalData, spinnerBinding.spinner,
                 clickCallback = { clickedFilter ->
-                    appState.registerFilter(filterKey, { song -> songPredicate(song, clickedFilter) })
+                    searchState.registerFilter(filterKey, { song -> songPredicate(song, clickedFilter) })
                     refreshListFromFilterBy()
                 },
                 defaultCallback = {
-                    appState.unregisterFilter(filterKey)
+                    searchState.unregisterFilter(filterKey)
                     refreshListFromFilterBy()
                 })
 
@@ -246,7 +221,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
         }
 
         binding.bottomSheetFilter.filterClear.click {
-            appState.clearFilters()
+            searchState.clearFilters()
 
             binding.bottomSheetFilter.filterArtist.spinner.setSelection(0)
             binding.bottomSheetFilter.filterGenre.spinner.setSelection(0)
@@ -281,9 +256,9 @@ class SearchActivity : AppCompatActivity(), SearchView {
     }
 
     private fun refreshListFromFilterBy() {
-        val filterValues = appState.filtersDefinitions()
+        val filterValues = searchState.filtersDefinitions()
         val filteredData = presenter.filter(listAdapter.originalData, filterValues)
-        val finalData = if (appState.isSortActive()) presenter.sort(filteredData, appState.sortBy) else filteredData
+        val finalData = if (searchState.isSortActive()) presenter.sort(filteredData, searchState.sortBy) else filteredData
 
         listAdapter.updateData(finalData)
         listAdapter.notifyDataSetChanged()
@@ -292,13 +267,13 @@ class SearchActivity : AppCompatActivity(), SearchView {
     }
 
     private fun refreshListFromSortBy() {
-        val toSort = listAdapter.run { if (appState.isFilterActive()) currentData else originalData }
-        val sortedData = presenter.sort(toSort, appState.sortBy)
+        val toSort = listAdapter.run { if (searchState.isFilterActive()) currentData else originalData }
+        val sortedData = presenter.sort(toSort, searchState.sortBy)
 
         listAdapter.updateData(sortedData)
         listAdapter.notifyDataSetChanged()
 
-        activateLabel(binding.sort, appState.sortBy != SortBy.NONE)
+        activateLabel(binding.sort, searchState.sortBy != SortBy.NONE)
     }
 
     private fun activateLabel(label: TextView, enable: Boolean) {
@@ -367,24 +342,31 @@ class SearchActivity : AppCompatActivity(), SearchView {
         bottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
     }
 
-    private fun setupSearchDataSourceSpinner() {
-        val sources = DataSourceEnum.values()
-        val items = sources.map { it.name.toLowerCase().capitalize() }
-        val adapter = ArrayAdapter<String>(this,
-            android.R.layout.simple_list_item_1, android.R.id.text1).apply {
-            addAll(items)
-        }
+    private fun setupSettings() {
+        val radioGroup = binding.bottomSheetSettings.dataSourceRadioGroup
+        val values = DataSourceEnum.values()
 
-        binding.bottomSheetSettings.dataSourceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                appState.dataSource = sources[position]
-                hideBottomSheet(settingsBottomSheet)
+        values.forEach {
+            val radioBtn = RadioButton(this).apply {
+                text = it.name.toLowerCase().capitalize()
 
-                binding.searchInput.retype()
+                click {
+                    searchState.updateDataSource(it)
+                    hideBottomSheet(settingsBottomSheet)
+                    binding.searchInput.retype()
+
+                    isChecked = !isChecked
+                }
+
+                if (it.default) {
+                    searchState.updateDataSource(it)
+                }
+
+                isChecked = it.default
             }
+
+            radioGroup.addView(radioBtn)
         }
-        binding.bottomSheetSettings.dataSourceSpinner.adapter = adapter
     }
 
     private fun setupSearchInput() {
@@ -412,14 +394,14 @@ class SearchActivity : AppCompatActivity(), SearchView {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
-                appState.query = it
+                searchState.updateSearchQuery(it)
 
                 if (it.isEmpty()) binding.clearSearchInput.gone()
                 else {
                     binding.clearSearchInput.visible()
                 }
             }
-            .subscribe({ presenter.handleSearchQuery(it, appState.dataSource) })
+            .subscribe({ presenter.handleSearchQuery(it, searchState.dataSource) })
             .addToDisposable(compositeDisposable)
     }
 }

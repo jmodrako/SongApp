@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/search_root"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+                  xmlns:app="http://schemas.android.com/apk/res-auto"
+                  android:id="@+id/search_root"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -63,30 +63,17 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="end"
                 android:divider="?android:attr/dividerVertical"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:paddingStart="4dp"
-                android:showDividers="middle">
-
-                <TextView
-                    android:id="@+id/search_result_count"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.4"
-                    android:gravity="start"
-                    android:paddingEnd="8dp"
-                    android:text=""
-                    android:textColor="@color/secondary_text"
-                    android:textSize="14sp"
-                    android:textStyle="italic" />
+                android:showDividers="middle|beginning">
 
                 <TextView
                     android:id="@+id/filter"
-                    android:layout_width="0dp"
+                    android:minWidth="100dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.3"
                     android:background="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:fontFamily="sans-serif"
@@ -98,9 +85,9 @@
 
                 <TextView
                     android:id="@+id/sort"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
+                    android:minWidth="100dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.3"
                     android:background="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:fontFamily="sans-serif"
@@ -110,15 +97,28 @@
                     android:textColor="@color/search_filter_sort_label_text_color_selector"
                     android:textSize="16sp" />
 
+                <TextView
+                    android:id="@+id/search_result_count"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text=""
+                    android:textColor="@color/secondary_text"
+                    android:textSize="14sp"
+                    android:textStyle="italic" />
+
                 <ImageView
                     android:id="@+id/settings"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:layout_margin="8dp"
+                    android:layout_marginStart="4dp"
+                    android:layout_gravity="end|center_vertical"
                     android:background="?attr/selectableItemBackground"
                     android:contentDescription="@null"
                     android:src="@drawable/ic_settings"
                     android:tint="@color/secondary_text" />
+
             </LinearLayout>
         </LinearLayout>
 

@@ -10,10 +10,6 @@ import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import java.util.concurrent.TimeUnit
 
-enum class DataSourceEnum {
-    LOCAL, REMOTE, ALL
-}
-
 typealias SearchQuery = Pair<DataSourceEnum, String>
 
 class SearchPresenter(private val dataSourcesMap: Map<DataSourceEnum, DataSource>) : BasePresenter<SearchView>() {
