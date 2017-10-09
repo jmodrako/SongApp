@@ -11,5 +11,5 @@
     <string name="filter">Filter</string>
     <string name="close">Close</string>
     <string name="clear">Clear</string>
-    <string name="select">Select</string>
+    <string name="all">All</string>
 </resources>

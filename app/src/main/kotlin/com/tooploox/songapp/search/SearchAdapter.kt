@@ -12,8 +12,12 @@ import com.tooploox.songapp.databinding.ListItemSongBinding
 
 class SearchAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder>() {
 
-    private val originalData: MutableList<SongModel> = mutableListOf()
-    private val currentData: MutableList<SongModel> = mutableListOf()
+    var originalData: List<SongModel> = listOf()
+        private set
+
+    var currentData: MutableList<SongModel> = mutableListOf()
+        private set
+
     private val layoutInflater = LayoutInflater.from(context)
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): BaseViewHolder =
@@ -34,37 +38,17 @@ class SearchAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder>() {
     override fun getItemCount() = currentData.size
 
     fun updateData(data: List<SongModel>) {
-        originalData.clear()
-        originalData.addAll(data)
-
         currentData.clear()
         currentData.addAll(data)
     }
 
+    fun updateOriginalData(results: List<SongModel>) {
+        originalData = results
+        updateData(originalData)
+    }
+
     fun clearData() {
         currentData.clear()
-    }
-
-    fun sortBy(sortPredicate: (SongModel) -> String) {
-        val sorted = originalData.sortedBy(sortPredicate)
-
-        currentData.clear()
-        currentData.addAll(sorted)
-
-        notifyDataSetChanged()
-    }
-
-    fun filterBy(filterValues: MutableCollection<FilterDefinition>) {
-        val filtered = if (filterValues.isEmpty()) {
-            originalData
-        } else {
-            originalData.filter { song -> filterValues.all { filter -> filter(song) } }
-        }
-
-        currentData.clear()
-        currentData.addAll(filtered)
-
-        notifyDataSetChanged()
     }
 
     fun isEmpty() = currentData.isEmpty()

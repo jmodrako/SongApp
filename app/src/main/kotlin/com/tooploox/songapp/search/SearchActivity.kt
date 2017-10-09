@@ -44,14 +44,28 @@ enum class SortBy(val visible: Boolean = true) {
 }
 
 typealias FilterDefinition = (SongModel) -> Boolean
-typealias FilterPredicate = (SongModel, String) -> Boolean
+typealias SongPredicate = (SongModel, String) -> Boolean
 
 data class AppState(
     var dataSource: DataSourceEnum = DataSourceEnum.REMOTE,
     var query: String = "",
-    var sortBy: SortBy = SortBy.TITLE,
-    var filterBy: MutableMap<String, FilterDefinition> = mutableMapOf()
-)
+    var sortBy: SortBy = SortBy.NONE,
+    private var filtersMap: MutableMap<String, FilterDefinition> = mutableMapOf()) {
+
+    fun isSortActive() = sortBy != SortBy.NONE
+
+    fun isFilterActive() = filtersMap.isNotEmpty()
+
+    fun registerFilter(filterKey: String, filter: FilterDefinition) {
+        filtersMap[filterKey] = filter
+    }
+
+    fun unregisterFilter(filterKey: String) = filtersMap.remove(filterKey)
+
+    fun clearFilters() = filtersMap.clear()
+
+    fun filtersDefinitions(): MutableCollection<FilterDefinition> = filtersMap.values
+}
 
 class SearchActivity : AppCompatActivity(), SearchView {
 
@@ -71,11 +85,11 @@ class SearchActivity : AppCompatActivity(), SearchView {
     private val adapterDataObserver = object : RecyclerView.AdapterDataObserver() {
         override fun onChanged() {
             if (listAdapter.isEmpty()) {
-                if (binding.searchInput.hasText) binding.searchResultCount.text = getString(R.string.search_result_count, 0)
+                if (binding.searchInput.hasText) showResultCountLabel(0)
 
                 showEmptyLayoutWithMessage(getString(R.string.cant_find_song))
             } else {
-                binding.searchResultCount.text = getString(R.string.search_result_count, listAdapter.itemCount)
+                showResultCountLabel(listAdapter.itemCount)
 
                 hideEmptyLayout()
             }
@@ -131,13 +145,27 @@ class SearchActivity : AppCompatActivity(), SearchView {
             createFilters(results)
             hideEmptyLayout()
 
-            listAdapter.updateData(results)
+            listAdapter.updateOriginalData(results)
             listAdapter.notifyDataSetChanged()
         }
     }
 
     override fun showSearchError() {
         toast(getString(R.string.something_went_wrong), Toast.LENGTH_SHORT)
+    }
+
+    override fun onBackPressed() {
+        val isAnySheetOpened = allBottomSheets.any { it.state == BottomSheetBehavior.STATE_EXPANDED }
+
+        if (isAnySheetOpened) {
+            hideAllSheets()
+        } else {
+            super.onBackPressed()
+        }
+    }
+
+    private fun showResultCountLabel(count: Int) {
+        binding.searchResultCount.text = getString(R.string.search_result_count, count)
     }
 
     private fun setupLoadingIndicator() {
@@ -186,24 +214,23 @@ class SearchActivity : AppCompatActivity(), SearchView {
 
     private fun prepareFilterSpinner(
         filterKey: String,
-        filterPredicate: FilterPredicate,
+        songPredicate: SongPredicate,
         dataMap: Map<String, List<SongModel>>,
         spinnerBinding: LayoutSpinnerWithLabelBinding) {
 
         val filteredMap = dataMap.filter { it.key.isNotBlank() }
 
         if (filteredMap.isNotEmpty()) {
-            val spinnerData = filteredMap
-                .map { "${it.key} (${it.value.size})" }
-                .sorted()
+            val spinnerData = filteredMap.map { "${it.key} (${it.value.size})" }.sorted()
+            val finalData = listOf("${getString(R.string.all)} (${spinnerData.size})") + spinnerData
 
-            prepareSpinner(spinnerData, spinnerBinding.spinner,
-                clickCallback = { _, item ->
-                    appState.filterBy[filterKey] = { song -> filterPredicate(song, item) }
+            prepareSpinner(finalData, spinnerBinding.spinner,
+                clickCallback = { clickedFilter ->
+                    appState.registerFilter(filterKey, { song -> songPredicate(song, clickedFilter) })
                     refreshListFromFilterBy()
                 },
                 defaultCallback = {
-                    appState.filterBy.remove(filterKey)
+                    appState.unregisterFilter(filterKey)
                     refreshListFromFilterBy()
                 })
 
@@ -219,7 +246,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
         }
 
         binding.bottomSheetFilter.filterClear.click {
-            appState.filterBy.clear()
+            appState.clearFilters()
 
             binding.bottomSheetFilter.filterArtist.spinner.setSelection(0)
             binding.bottomSheetFilter.filterGenre.spinner.setSelection(0)
@@ -230,12 +257,11 @@ class SearchActivity : AppCompatActivity(), SearchView {
 
     private fun prepareSpinner(
         data: List<String>, spinner: Spinner,
-        clickCallback: (Int, String) -> Unit,
+        clickCallback: (String) -> Unit,
         defaultCallback: () -> Unit) {
 
         val adapter = ArrayAdapter<String>(this,
             android.R.layout.simple_list_item_1, android.R.id.text1).apply {
-            add(getString(R.string.select))
             addAll(data)
         }
 
@@ -246,27 +272,31 @@ class SearchActivity : AppCompatActivity(), SearchView {
                 if (position == 0) {
                     defaultCallback()
                 } else {
-                    val clickedLabel = data[position - 1]
+                    val clickedLabel = data[position]
                     val clickedItem = clickedLabel.take(clickedLabel.lastIndexOf(" "))
-                    clickCallback(position, clickedItem)
+                    clickCallback(clickedItem)
                 }
             }
         }
     }
 
     private fun refreshListFromFilterBy() {
-        val filterValues = appState.filterBy.values
-        listAdapter.filterBy(filterValues)
+        val filterValues = appState.filtersDefinitions()
+        val filteredData = presenter.filter(listAdapter.originalData, filterValues)
+        val finalData = if (appState.isSortActive()) presenter.sort(filteredData, appState.sortBy) else filteredData
+
+        listAdapter.updateData(finalData)
+        listAdapter.notifyDataSetChanged()
 
         activateLabel(binding.filter, filterValues.isNotEmpty())
     }
 
     private fun refreshListFromSortBy() {
-        listAdapter.sortBy(when (appState.sortBy) {
-            SortBy.NONE, SortBy.TITLE -> SongModel::title
-            SortBy.AUTHOR -> SongModel::artist
-            SortBy.YEAR -> SongModel::year
-        })
+        val toSort = listAdapter.run { if (appState.isFilterActive()) currentData else originalData }
+        val sortedData = presenter.sort(toSort, appState.sortBy)
+
+        listAdapter.updateData(sortedData)
+        listAdapter.notifyDataSetChanged()
 
         activateLabel(binding.sort, appState.sortBy != SortBy.NONE)
     }
@@ -323,10 +353,14 @@ class SearchActivity : AppCompatActivity(), SearchView {
                 if (bottomSheet.state != BottomSheetBehavior.STATE_HIDDEN) BottomSheetBehavior.STATE_HIDDEN
                 else BottomSheetBehavior.STATE_EXPANDED
 
-            allBottomSheets
-                .filter { it != bottomSheet }
-                .forEach { it.state = BottomSheetBehavior.STATE_HIDDEN }
+            hideAllSheets(bottomSheet)
         }
+    }
+
+    private fun hideAllSheets(bottomSheetToStayOpen: BottomSheetBehavior<*>? = null) {
+        allBottomSheets
+            .filter { it != bottomSheetToStayOpen }
+            .forEach { it.state = BottomSheetBehavior.STATE_HIDDEN }
     }
 
     private fun hideBottomSheet(bottomSheet: BottomSheetBehavior<*>) {
