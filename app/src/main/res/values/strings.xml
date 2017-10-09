@@ -9,4 +9,6 @@
     <string name="author_info">Created by Jacek Modrakowski\nTooploox.com, 2017</string>
     <string name="sort">Sort</string>
     <string name="filter">Filter</string>
+    <string name="close">Close</string>
+    <string name="clear">Clear</string>
 </resources>

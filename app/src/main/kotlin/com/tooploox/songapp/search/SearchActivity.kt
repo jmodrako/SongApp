@@ -149,6 +149,8 @@ class SearchActivity : AppCompatActivity(), SearchView {
 
             hideBottomSheet(sortBottomSheet)
         }
+
+        binding.bottomSheetSort.sortClose.click { hideBottomSheet(sortBottomSheet) }
     }
 
     private fun refreshListFromSortBy() {
