@@ -305,6 +305,9 @@ class SearchActivity : AppCompatActivity(), SearchView {
         }
     }
 
+    /**
+     * Could be done via Dagger 2.
+     */
     private fun createSearchPresenter() =
         SearchPresenter(mapOf(
             DataSourceEnum.LOCAL to LocalDataSource(AssetsProvider(this)),
