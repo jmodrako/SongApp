@@ -31,6 +31,9 @@ fun EditText.retype() {
     this.setSelection(currentText.length)
 }
 
+val TextView.hasText: Boolean
+    get() = this.text?.isNotBlank() ?: false
+
 fun TextView.bold(bold: Boolean = true) {
     this.typeface = if (bold) android.graphics.Typeface.DEFAULT_BOLD else android.graphics.Typeface.DEFAULT
 }

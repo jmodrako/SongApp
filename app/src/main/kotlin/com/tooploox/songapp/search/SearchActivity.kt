@@ -22,6 +22,7 @@ import com.tooploox.songapp.common.bindContentView
 import com.tooploox.songapp.common.bold
 import com.tooploox.songapp.common.click
 import com.tooploox.songapp.common.gone
+import com.tooploox.songapp.common.hasText
 import com.tooploox.songapp.common.hideKeyboard
 import com.tooploox.songapp.common.retype
 import com.tooploox.songapp.common.toast
@@ -70,8 +71,12 @@ class SearchActivity : AppCompatActivity(), SearchView {
     private val adapterDataObserver = object : RecyclerView.AdapterDataObserver() {
         override fun onChanged() {
             if (listAdapter.isEmpty()) {
+                if (binding.searchInput.hasText) binding.searchResultCount.text = getString(R.string.search_result_count, 0)
+
                 showEmptyLayoutWithMessage(getString(R.string.cant_find_song))
             } else {
+                binding.searchResultCount.text = getString(R.string.search_result_count, listAdapter.itemCount)
+
                 hideEmptyLayout()
             }
         }
@@ -118,8 +123,6 @@ class SearchActivity : AppCompatActivity(), SearchView {
     }
 
     override fun showSearchResults(results: List<SongModel>) {
-        binding.searchResultCount.text = getString(R.string.search_result_count, results.size)
-
         listAdapter.clearData()
 
         if (results.isEmpty()) {
