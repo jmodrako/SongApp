@@ -21,6 +21,7 @@ import com.tooploox.songapp.common.addToDisposable
 import com.tooploox.songapp.common.bindContentView
 import com.tooploox.songapp.common.bold
 import com.tooploox.songapp.common.click
+import com.tooploox.songapp.common.firstCheckedButton
 import com.tooploox.songapp.common.gone
 import com.tooploox.songapp.common.hasText
 import com.tooploox.songapp.common.hideKeyboard
@@ -342,31 +343,38 @@ class SearchActivity : AppCompatActivity(), SearchView {
         bottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
     }
 
+    /**
+     * There is no easy way to create RadioGroup with dynamic buttons in it...
+     */
     private fun setupSettings() {
         val radioGroup = binding.bottomSheetSettings.dataSourceRadioGroup
         val values = DataSourceEnum.values()
+
+        radioGroup.setOnCheckedChangeListener({ _, _ ->
+            val firstCheckedButton = radioGroup.firstCheckedButton()
+            val checkedDataSource = firstCheckedButton.tag as DataSourceEnum
+
+            searchState.updateDataSource(checkedDataSource)
+            hideBottomSheet(settingsBottomSheet)
+            binding.searchInput.retype()
+        })
 
         values.forEach {
             val radioBtn = RadioButton(this).apply {
                 text = it.name.toLowerCase().capitalize()
 
-                click {
-                    searchState.updateDataSource(it)
-                    hideBottomSheet(settingsBottomSheet)
-                    binding.searchInput.retype()
-
-                    isChecked = !isChecked
-                }
-
                 if (it.default) {
                     searchState.updateDataSource(it)
                 }
 
-                isChecked = it.default
+                tag = it
             }
 
             radioGroup.addView(radioBtn)
         }
+
+        val indexToCheck = values.first(DataSourceEnum::default).ordinal
+        (radioGroup.views[indexToCheck] as RadioButton).isChecked = true
     }
 
     private fun setupSearchInput() {
