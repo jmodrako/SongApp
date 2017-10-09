@@ -48,23 +48,6 @@ class SearchPresenter(private val dataSourcesMap: Map<DataSourceEnum, DataSource
         }
     }
 
-    fun sort(originalData: List<SongModel>, sortBy: SortBy): List<SongModel> {
-        val predicate = when (sortBy) {
-            SortBy.NONE, SortBy.TITLE -> SongModel::title
-            SortBy.AUTHOR -> SongModel::artist
-            SortBy.YEAR -> SongModel::year
-        }
-
-        return originalData.sortedBy(predicate)
-    }
-
-    fun filter(originalData: List<SongModel>, filterValues: MutableCollection<FilterDefinition>) =
-        if (filterValues.isEmpty()) {
-            originalData
-        } else {
-            originalData.filter { song -> filterValues.all { filter -> filter(song) } }
-        }
-
     @SuppressWarnings("unchecked")
     private fun chooseDataSource(dataSourceEnum: DataSourceEnum, query: String): Single<List<SongModel>> =
         when (dataSourceEnum) {

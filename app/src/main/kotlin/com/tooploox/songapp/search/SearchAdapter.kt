@@ -58,6 +58,23 @@ class SearchAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder>() {
     }
 
     fun isEmpty() = currentData.isEmpty()
+
+    fun sort(data: List<SongModel>, sortBy: SortBy): List<SongModel> {
+        val predicate = when (sortBy) {
+            SortBy.NONE, SortBy.TITLE -> SongModel::title
+            SortBy.AUTHOR -> SongModel::artist
+            SortBy.YEAR -> SongModel::year
+        }
+
+        return data.sortedBy(predicate)
+    }
+
+    fun filter(data: List<SongModel>, filterValues: MutableCollection<FilterDefinition>) =
+        if (filterValues.isEmpty()) {
+            data
+        } else {
+            data.filter { song -> filterValues.all { filter -> filter(song) } }
+        }
 }
 
 sealed class BaseViewHolder(binding: ViewDataBinding) : RecyclerView.ViewHolder(binding.root)

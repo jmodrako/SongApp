@@ -229,8 +229,8 @@ class SearchActivity : AppCompatActivity(), SearchView {
 
     private fun refreshListFromFilterBy() {
         val filterValues = searchState.filtersDefinitions()
-        val filteredData = presenter.filter(listAdapter.originalData, filterValues)
-        val finalData = if (searchState.isSortActive()) presenter.sort(filteredData, searchState.sortBy) else filteredData
+        val filteredData = listAdapter.filter(listAdapter.originalData, filterValues)
+        val finalData = if (searchState.isSortActive()) listAdapter.sort(filteredData, searchState.sortBy) else filteredData
 
         listAdapter.updateData(finalData)
         listAdapter.notifyDataSetChanged()
@@ -240,7 +240,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
 
     private fun refreshListFromSortBy() {
         val toSort = listAdapter.run { if (searchState.isFilterActive()) currentData else originalData }
-        val sortedData = presenter.sort(toSort, searchState.sortBy)
+        val sortedData = listAdapter.sort(toSort, searchState.sortBy)
 
         listAdapter.updateData(sortedData)
         listAdapter.notifyDataSetChanged()
