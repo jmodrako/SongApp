@@ -8,8 +8,7 @@
             type="String" />
     </data>
 
-    <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -18,22 +17,22 @@
 
         <ImageView
             android:layout_width="224dp"
-            android:layout_marginTop="-64dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="-64dp"
+            android:contentDescription="@null"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_empty_list"
-            android:contentDescription="@null" />
+            android:src="@drawable/ic_empty_list" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
             android:layout_marginTop="-16dp"
-            android:gravity="center"
-            android:textColor="@color/secondary_text"
             android:fontFamily="sans-serif-condensed"
-            android:text="@{message}" />
+            android:gravity="center"
+            android:paddingEnd="12dp"
+            android:paddingStart="12dp"
+            android:text="@{message}"
+            android:textColor="@color/secondary_text"
+            android:textSize="20sp" />
     </LinearLayout>
 </layout>
