@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.TextView
 
 fun RecyclerView.withVerticalManager() {
     layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
@@ -28,4 +29,8 @@ fun EditText.retype() {
     val currentText = this.text.toString()
     this.setText(currentText)
     this.setSelection(currentText.length)
+}
+
+fun TextView.bold(bold: Boolean = true) {
+    this.typeface = if (bold) android.graphics.Typeface.DEFAULT_BOLD else android.graphics.Typeface.DEFAULT
 }

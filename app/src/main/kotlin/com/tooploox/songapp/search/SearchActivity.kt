@@ -3,6 +3,7 @@ package com.tooploox.songapp.search
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.support.design.widget.BottomSheetBehavior
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.MotionEvent
 import android.view.View
@@ -15,6 +16,7 @@ import com.jakewharton.rxbinding2.widget.RxTextView
 import com.tooploox.songapp.R
 import com.tooploox.songapp.common.addToDisposable
 import com.tooploox.songapp.common.bindContentView
+import com.tooploox.songapp.common.bold
 import com.tooploox.songapp.common.click
 import com.tooploox.songapp.common.gone
 import com.tooploox.songapp.common.hideKeyboard
@@ -48,9 +50,11 @@ class SearchActivity : AppCompatActivity(), SearchView {
     private lateinit var binding: ActivitySearchBinding
 
     private val listAdapter by lazy { SearchAdapter(this) }
+
     private val settingsBottomSheet by lazy { BottomSheetBehavior.from(binding.bottomSheetSettings.bottomSheet) }
     private val filterBottomSheet by lazy { BottomSheetBehavior.from(binding.bottomSheetFilter.bottomSheet) }
     private val sortBottomSheet by lazy { BottomSheetBehavior.from(binding.bottomSheetSort.bottomSheet) }
+    private val allBottomSheets by lazy { listOf(settingsBottomSheet, filterBottomSheet, sortBottomSheet) }
 
     private val compositeDisposable = CompositeDisposable()
     private var appState = AppState()
@@ -103,6 +107,16 @@ class SearchActivity : AppCompatActivity(), SearchView {
             SortBy.NONE, SortBy.TITLE -> SongModel::title
             SortBy.AUTHOR -> SongModel::artist
             SortBy.YEAR -> SongModel::year
+        })
+
+        binding.sort.setTextColor(when (appState.sortBy) {
+            SortBy.NONE -> ContextCompat.getColor(this, R.color.primary_text)
+            else -> ContextCompat.getColor(this, R.color.red)
+        })
+
+        binding.sort.bold(when (appState.sortBy) {
+            SortBy.NONE -> false
+            else -> true
         })
     }
 
@@ -184,6 +198,10 @@ class SearchActivity : AppCompatActivity(), SearchView {
             bottomSheet.state =
                 if (bottomSheet.state != BottomSheetBehavior.STATE_HIDDEN) BottomSheetBehavior.STATE_HIDDEN
                 else BottomSheetBehavior.STATE_EXPANDED
+
+            allBottomSheets
+                .filter { it != bottomSheet }
+                .forEach { it.state = BottomSheetBehavior.STATE_HIDDEN }
         }
     }
 
