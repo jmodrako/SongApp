@@ -19,13 +19,34 @@
 
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="100dp"
+            android:layout_height="wrap_content"
             android:textSize="14sp"
             android:fontFamily="sans-serif-medium"
             android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-            android:layout_marginBottom="-6dp"
-            android:text="Sort"
+            android:layout_marginBottom="12dp"
+            android:text="Sort by:"
             android:textColor="@color/secondary_text" />
 
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <RadioGroup
+                android:layout_gravity="start"
+                android:id="@+id/sort_radio_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp" />
+
+            <Button
+                android:id="@+id/sort_clear"
+                android:layout_gravity="end|bottom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="?android:attr/borderlessButtonStyle"
+                android:textColor="@color/primary_dark"
+                android:text="Clear" />
+
+        </FrameLayout>
     </LinearLayout>
 </layout>

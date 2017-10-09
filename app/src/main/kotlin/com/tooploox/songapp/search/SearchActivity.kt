@@ -9,6 +9,7 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.RadioButton
 import android.widget.Toast
 import com.jakewharton.rxbinding2.widget.RxTextView
 import com.tooploox.songapp.R
@@ -19,6 +20,7 @@ import com.tooploox.songapp.common.gone
 import com.tooploox.songapp.common.hideKeyboard
 import com.tooploox.songapp.common.retype
 import com.tooploox.songapp.common.toast
+import com.tooploox.songapp.common.views
 import com.tooploox.songapp.common.visible
 import com.tooploox.songapp.common.withVerticalManager
 import com.tooploox.songapp.data.SongModel
@@ -29,6 +31,16 @@ import com.tooploox.songapp.databinding.ActivitySearchBinding
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+
+enum class SortBy(val visible: Boolean = true) {
+    TITLE, AUTHOR, YEAR, NONE(false)
+}
+
+data class AppState(
+    var dataSource: DataSourceEnum = DataSourceEnum.REMOTE,
+    var query: String = "",
+    var sortBy: SortBy = SortBy.TITLE
+)
 
 class SearchActivity : AppCompatActivity(), SearchView {
 
@@ -41,7 +53,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
     private val sortBottomSheet by lazy { BottomSheetBehavior.from(binding.bottomSheetSort.bottomSheet) }
 
     private val compositeDisposable = CompositeDisposable()
-    private var dataSource = DataSourceEnum.REMOTE
+    private var appState = AppState()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,9 +64,46 @@ class SearchActivity : AppCompatActivity(), SearchView {
         setupInitialBottomSheet(sortBottomSheet, binding.sort)
         setupInitialBottomSheet(settingsBottomSheet, binding.settings)
 
+        setupSorting()
+
         setupSearchInput()
         setupSearchDataSourceSpinner()
         setupSearchResultsList()
+    }
+
+    private fun setupSorting() {
+        SortBy.values()
+            .filter(SortBy::visible)
+            .forEach {
+                val radioBtn = RadioButton(this).apply {
+                    text = it.name.toLowerCase().capitalize()
+                    click {
+                        appState.sortBy = it
+                        refreshListFromSortBy()
+                    }
+                }
+
+                binding.bottomSheetSort.sortRadioGroup.addView(radioBtn)
+            }
+
+        binding.bottomSheetSort.sortClear.click {
+            binding.bottomSheetSort.sortRadioGroup.views
+                .filterIsInstance(RadioButton::class.java)
+                .forEach { it.isChecked = false }
+
+            appState.sortBy = SortBy.NONE
+            refreshListFromSortBy()
+
+            hideBottomSheet(sortBottomSheet)
+        }
+    }
+
+    private fun refreshListFromSortBy() {
+        listAdapter.sortBy(when (appState.sortBy) {
+            SortBy.NONE, SortBy.TITLE -> SongModel::title
+            SortBy.AUTHOR -> SongModel::artist
+            SortBy.YEAR -> SongModel::year
+        })
     }
 
     private fun createSearchPresenter() =
@@ -153,7 +202,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
         binding.bottomSheetSettings.dataSourceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                dataSource = sources[position]
+                appState.dataSource = sources[position]
                 hideBottomSheet(settingsBottomSheet)
 
                 binding.searchInput.retype()
@@ -187,10 +236,12 @@ class SearchActivity : AppCompatActivity(), SearchView {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
+                appState.query = it
+
                 if (it.isEmpty()) binding.clearSearchInput.gone()
                 else binding.clearSearchInput.visible()
             }
-            .subscribe({ presenter.handleSearchQuery(it, dataSource) })
+            .subscribe({ presenter.handleSearchQuery(it, appState.dataSource) })
             .addToDisposable(compositeDisposable)
     }
 }

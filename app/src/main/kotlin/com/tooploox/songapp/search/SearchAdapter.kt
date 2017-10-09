@@ -12,7 +12,7 @@ import com.tooploox.songapp.databinding.ListItemSongBinding
 
 class SearchAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder>() {
 
-    private val originalData: List<SongModel> = emptyList()
+    private val originalData: MutableList<SongModel> = mutableListOf()
     private val currentData: MutableList<SongModel> = mutableListOf()
     private val layoutInflater = LayoutInflater.from(context)
 
@@ -34,12 +34,24 @@ class SearchAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder>() {
     override fun getItemCount() = currentData.size
 
     fun updateData(data: List<SongModel>) {
+        originalData.clear()
+        originalData.addAll(data)
+
         currentData.clear()
         currentData.addAll(data)
     }
 
     fun clearData() {
         currentData.clear()
+    }
+
+    fun sortBy(sortPredicate: (SongModel) -> String) {
+        val sorted = originalData.sortedBy(sortPredicate)
+
+        currentData.clear()
+        currentData.addAll(sorted)
+
+        notifyDataSetChanged()
     }
 }
 

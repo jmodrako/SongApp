@@ -3,6 +3,7 @@ package com.tooploox.songapp.common
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
 
 fun RecyclerView.withVerticalManager() {
@@ -19,6 +20,9 @@ fun View?.gone() {
 
 fun View.click(callback: () -> Unit) = this.setOnClickListener { callback.invoke() }
 fun View?.clearClickListener() = this?.setOnClickListener(null)
+
+val ViewGroup.views: List<View>
+    get() = (0 until childCount).map(this::getChildAt)
 
 fun EditText.retype() {
     val currentText = this.text.toString()

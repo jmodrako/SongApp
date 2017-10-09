@@ -10,7 +10,7 @@ internal data class ApiSongModel(
     @SerializedName("releaseDate") private val releaseDate: LocalDateTime? = null
 ) {
     val releaseYear
-        get() = releaseDate?.year?.toString()
+        get() = releaseDate?.year?.toString() ?: ""
 }
 
 internal data class ApiSearchModel(
