@@ -1,10 +1,13 @@
 package com.tooploox.songapp.common
 
 import android.content.Context
+import android.graphics.Color
 import android.view.View
+import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
+import android.widget.TextView
 
 fun prepareSpinnerUtil(
     context: Context,
@@ -12,7 +15,13 @@ fun prepareSpinnerUtil(
     clickCallback: (String) -> Unit,
     defaultCallback: () -> Unit) {
 
-    val adapter = ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, android.R.id.text1)
+    val adapter = object : ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, android.R.id.text1) {
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+            val result = super.getView(position, convertView, parent)
+            result.findViewById<TextView>(android.R.id.text1).setTextColor(Color.WHITE)
+            return result
+        }
+    }
     adapter.addAll(data)
 
     spinner.adapter = adapter

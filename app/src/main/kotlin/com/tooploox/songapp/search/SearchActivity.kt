@@ -1,10 +1,12 @@
 package com.tooploox.songapp.search
 
 import android.annotation.SuppressLint
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.support.design.widget.BottomSheetBehavior
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.AppCompatRadioButton
 import android.support.v7.widget.RecyclerView
 import android.view.MotionEvent
 import android.view.inputmethod.EditorInfo
@@ -119,6 +121,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
         listAdapter.clearCurrentData()
 
         if (results.isEmpty()) {
+            showResultCountLabel(0)
             showEmptyLayoutWithMessage(getString(R.string.cant_find_song))
         } else {
             createFilters(results)
@@ -140,7 +143,10 @@ class SearchActivity : AppCompatActivity(), SearchView {
     }
 
     private fun showResultCountLabel(count: Int) {
-        binding.searchResultCount.text = getString(R.string.search_result_count, count)
+        binding.searchResultCount.text = when (count) {
+            0 -> getString(R.string.no_search_result)
+            else -> getString(R.string.search_result_count, count)
+        }
     }
 
     private fun setupLoadingIndicator() {
@@ -190,8 +196,12 @@ class SearchActivity : AppCompatActivity(), SearchView {
         SortBy.values()
             .filter(SortBy::visible)
             .forEach {
-                val radioBtn = RadioButton(this).apply {
+                val radioBtn = AppCompatRadioButton(this).apply {
                     text = it.name.toLowerCase().capitalize()
+                    val color = ContextCompat.getColor(context, R.color.primary_text_white)
+                    setTextColor(color)
+                    buttonTintList = ColorStateList.valueOf(color)
+
                     click {
                         searchState.updateSortBy(it)
                         refreshListFromSortBy()
@@ -269,7 +279,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
 
     private fun activateLabel(label: TextView, enable: Boolean) =
         label.run {
-            setTextColor(ContextCompat.getColor(context, if (enable) R.color.red else R.color.primary_text))
+            setTextColor(ContextCompat.getColor(context, if (enable) R.color.accent else R.color.primary_text_white))
             bold(enable)
         }
 
@@ -278,8 +288,8 @@ class SearchActivity : AppCompatActivity(), SearchView {
      */
     private fun createSearchPresenter() =
         SearchPresenter(mapOf(
-            DataSource.Type.LOCAL to LocalDataSource(AssetsProvider(this)),
-            DataSource.Type.REMOTE to RemoteDataSource()))
+            DataSource.Type.REMOTE to RemoteDataSource(),
+            DataSource.Type.LOCAL to LocalDataSource(AssetsProvider(this))))
 
     private fun hideEmptyLayout() {
         binding.recyclerView.visible()
@@ -330,8 +340,11 @@ class SearchActivity : AppCompatActivity(), SearchView {
         })
 
         values.forEach {
-            val radioBtn = RadioButton(this).apply {
+            val radioBtn = AppCompatRadioButton(this).apply {
                 text = it.name.toLowerCase().capitalize()
+                val color = ContextCompat.getColor(context, R.color.primary_text_white)
+                setTextColor(color)
+                buttonTintList = ColorStateList.valueOf(color)
 
                 if (it.default) {
                     searchState.updateDataSource(it)

@@ -8,7 +8,7 @@
         android:id="@+id/bottom_sheet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
+        android:background="@color/primary_dark"
         android:elevation="6dp"
         android:gravity="center_vertical"
         android:orientation="vertical"
@@ -20,10 +20,10 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="@string/data_source"
             android:layout_marginBottom="4dp"
             android:fontFamily="sans-serif-medium"
-            android:text="@string/data_source"
-            android:textColor="@color/secondary_text"
+            android:textColor="@color/primary_text_white"
             android:textSize="14sp" />
 
         <RadioGroup
@@ -42,7 +42,7 @@
             android:fontFamily="sans-serif-smallcaps"
             android:gravity="center"
             android:text="@string/author_info"
-            android:textColor="@color/secondary_text"
+            android:textColor="@color/primary_text_white"
             android:textSize="12sp" />
 
     </LinearLayout>

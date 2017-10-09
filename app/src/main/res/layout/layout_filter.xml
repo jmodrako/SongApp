@@ -8,7 +8,7 @@
         android:id="@+id/bottom_sheet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
+        android:background="@color/primary_dark"
         android:elevation="6dp"
         android:gravity="center_vertical"
         android:orientation="vertical"
@@ -19,12 +19,16 @@
 
         <include
             android:id="@+id/filter_genre"
-            app:label='@{"Genre"}'
+            app:label='@{@string/genre}'
             layout="@layout/layout_spinner_with_label" />
+
+        <Space
+            android:layout_width="12dp"
+            android:layout_height="12dp" />
 
         <include
             android:id="@+id/filter_artist"
-            app:label='@{"Artist"}'
+            app:label='@{@string/artist}'
             layout="@layout/layout_spinner_with_label" />
 
         <LinearLayout
@@ -39,7 +43,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/clear"
-                android:textColor="@color/primary_dark" />
+                android:textColor="@color/accent" />
 
             <Button
                 android:id="@+id/filter_close"
@@ -47,7 +51,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/close"
-                android:textColor="@color/secondary_text" />
+                android:textColor="@color/primary_text_white" />
         </LinearLayout>
     </LinearLayout>
 </layout>

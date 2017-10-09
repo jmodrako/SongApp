@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:tools="http://schemas.android.com/tools">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                  xmlns:app="http://schemas.android.com/apk/res-auto"
-                  android:id="@+id/search_root"
-                  android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-                  android:orientation="vertical">
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/search_root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:color/white"
+            android:background="@color/primary_dark"
             android:elevation="2dp"
             android:gravity="center_vertical"
             android:orientation="vertical"
@@ -37,13 +38,16 @@
                         android:id="@+id/search_input"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:focusedByDefault="false"
                         android:fontFamily="sans-serif-black"
                         android:hint="@string/search_hint"
+                        android:textColorHint="@color/primary_text_white"
+                        android:textColor="@color/primary_text_white"
                         android:imeOptions="actionSearch"
                         android:inputType="text"
+                        android:backgroundTint="@color/divider"
                         android:paddingEnd="44dp"
-                        android:textSize="22sp" />
+                        android:textSize="22sp"
+                        tools:ignore="RtlSymmetry" />
 
                     <ImageView
                         android:id="@+id/clear_search_input"
@@ -52,6 +56,7 @@
                         android:layout_gravity="end|center_vertical"
                         android:background="?attr/selectableItemBackground"
                         android:clickable="true"
+                        android:tint="@color/accent"
                         android:contentDescription="@null"
                         android:padding="8dp"
                         android:src="@drawable/ic_clear"
@@ -63,11 +68,12 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:divider="?android:attr/dividerVertical"
+                android:divider="@drawable/divider"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:paddingStart="4dp"
-                android:showDividers="middle|beginning">
+                android:showDividers="middle"
+                tools:ignore="RtlSymmetry">
 
                 <TextView
                     android:id="@+id/filter"
@@ -80,7 +86,7 @@
                     android:gravity="center"
                     android:padding="8dp"
                     android:text="@string/filter"
-                    android:textColor="@color/search_filter_sort_label_text_color_selector"
+                    android:textColor="@color/primary_text_white"
                     android:textSize="16sp" />
 
                 <TextView
@@ -94,7 +100,7 @@
                     android:gravity="center"
                     android:padding="8dp"
                     android:text="@string/sort"
-                    android:textColor="@color/search_filter_sort_label_text_color_selector"
+                    android:textColor="@color/primary_text_white"
                     android:textSize="16sp" />
 
                 <TextView
@@ -104,7 +110,7 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:text=""
-                    android:textColor="@color/secondary_text"
+                    android:textColor="@color/secondary_text_white"
                     android:textSize="14sp"
                     android:textStyle="italic" />
 
@@ -117,7 +123,7 @@
                     android:background="?attr/selectableItemBackground"
                     android:contentDescription="@null"
                     android:src="@drawable/ic_settings"
-                    android:tint="@color/secondary_text" />
+                    android:tint="@color/primary_text_white" />
 
             </LinearLayout>
         </LinearLayout>

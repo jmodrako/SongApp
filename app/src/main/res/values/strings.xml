@@ -1,15 +1,19 @@
 <resources>
     <string name="app_name">SongApp</string>
-    <string name="search_hint">Search…</string>
+    <string name="search_hint">Search here…</string>
     <string name="data_source">Data source</string>
     <string name="cant_find_song">We can\'t find any song.</string>
     <string name="something_went_wrong">Something went wrong…</string>
     <string name="type_query_to_find_song">Type query and results\nwill be listed here.</string>
     <string name="search_result_count">Found %1$d songs</string>
-    <string name="author_info">Created by Jacek Modrakowski\nTooploox.com, 2017</string>
+    <string name="no_search_result">No songs</string>
+    <string name="author_info">Handcrafted with care by Jacek Modrakowski\nfor Tooploox.com, 2017</string>
     <string name="sort">Sort</string>
+    <string name="sort_by">Sort by</string>
     <string name="filter">Filter</string>
     <string name="close">Close</string>
     <string name="clear">Clear</string>
     <string name="all">All</string>
+    <string name="genre">Genre filter</string>
+    <string name="artist">Artist filter</string>
 </resources>
