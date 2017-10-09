@@ -11,6 +11,8 @@ import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.RadioButton
+import android.widget.Spinner
+import android.widget.TextView
 import android.widget.Toast
 import com.jakewharton.rxbinding2.widget.RxTextView
 import com.tooploox.songapp.R
@@ -30,6 +32,7 @@ import com.tooploox.songapp.data.local.AssetsProvider
 import com.tooploox.songapp.data.local.LocalDataSource
 import com.tooploox.songapp.data.remote.RemoteDataSource
 import com.tooploox.songapp.databinding.ActivitySearchBinding
+import com.tooploox.songapp.databinding.LayoutSpinnerWithLabelBinding
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -38,10 +41,14 @@ enum class SortBy(val visible: Boolean = true) {
     TITLE, AUTHOR, YEAR, NONE(false)
 }
 
+typealias FilterDefinition = (SongModel) -> Boolean
+typealias FilterPredicate = (SongModel, String) -> Boolean
+
 data class AppState(
     var dataSource: DataSourceEnum = DataSourceEnum.REMOTE,
     var query: String = "",
-    var sortBy: SortBy = SortBy.TITLE
+    var sortBy: SortBy = SortBy.TITLE,
+    var filterBy: MutableMap<String, FilterDefinition> = mutableMapOf()
 )
 
 class SearchActivity : AppCompatActivity(), SearchView {
@@ -69,7 +76,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
         setupInitialBottomSheet(settingsBottomSheet, binding.settings)
 
         setupSorting()
-        // TODO: setupFiltering()
+        setupFiltering()
         setupLoadingIndicator()
 
         setupSearchInput()
@@ -106,6 +113,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
         if (results.isEmpty()) {
             showEmptyLayoutWithMessage(getString(R.string.cant_find_song))
         } else {
+            createFilters(results)
             hideEmptyLayout()
 
             listAdapter.updateData(results)
@@ -153,6 +161,91 @@ class SearchActivity : AppCompatActivity(), SearchView {
         binding.bottomSheetSort.sortClose.click { hideBottomSheet(sortBottomSheet) }
     }
 
+    private fun createFilters(data: List<SongModel>) {
+        prepareFilterSpinner("artist", { song, clickedFilter -> song.artist == clickedFilter },
+            data.groupBy(SongModel::artist), binding.bottomSheetFilter.filterArtist)
+
+        prepareFilterSpinner("genre", { song, clickedFilter -> song.genre == clickedFilter },
+            data.groupBy(SongModel::genre), binding.bottomSheetFilter.filterGenre)
+    }
+
+    private fun prepareFilterSpinner(
+        filterKey: String,
+        filterPredicate: FilterPredicate,
+        dataMap: Map<String, List<SongModel>>,
+        spinnerBinding: LayoutSpinnerWithLabelBinding) {
+
+        val filteredMap = dataMap.filter { it.key.isNotBlank() }
+
+        if (filteredMap.isNotEmpty()) {
+            val spinnerData = filteredMap
+                .map { "${it.key} (${it.value.size})" }
+                .sorted()
+
+            prepareSpinner(spinnerData, spinnerBinding.spinner,
+                clickCallback = { _, item ->
+                    appState.filterBy[filterKey] = { song -> filterPredicate(song, item) }
+                    refreshListFromFilterBy()
+                },
+                defaultCallback = {
+                    appState.filterBy.remove(filterKey)
+                    refreshListFromFilterBy()
+                })
+
+            spinnerBinding.root.visible()
+        } else {
+            spinnerBinding.root.gone()
+        }
+    }
+
+    private fun setupFiltering() {
+        binding.bottomSheetFilter.filterClose.click {
+            hideBottomSheet(filterBottomSheet)
+        }
+
+        binding.bottomSheetFilter.filterClear.click {
+            appState.filterBy.clear()
+
+            binding.bottomSheetFilter.filterArtist.spinner.setSelection(0)
+            binding.bottomSheetFilter.filterGenre.spinner.setSelection(0)
+
+            hideBottomSheet(filterBottomSheet)
+        }
+    }
+
+    private fun prepareSpinner(
+        data: List<String>, spinner: Spinner,
+        clickCallback: (Int, String) -> Unit,
+        defaultCallback: () -> Unit) {
+
+        val adapter = ArrayAdapter<String>(this,
+            android.R.layout.simple_list_item_1, android.R.id.text1).apply {
+            add(getString(R.string.select))
+            addAll(data)
+        }
+
+        spinner.adapter = adapter
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                if (position == 0) {
+                    defaultCallback()
+                } else {
+                    val clickedLabel = data[position - 1]
+                    val clickedItem = clickedLabel.take(clickedLabel.lastIndexOf(" "))
+                    clickCallback(position, clickedItem)
+                }
+            }
+        }
+    }
+
+    private fun refreshListFromFilterBy() {
+        val filterValues = appState.filterBy.values
+        listAdapter.filterBy(filterValues)
+
+        activateLabel(binding.filter, filterValues.isNotEmpty())
+    }
+
     private fun refreshListFromSortBy() {
         listAdapter.sortBy(when (appState.sortBy) {
             SortBy.NONE, SortBy.TITLE -> SongModel::title
@@ -160,15 +253,14 @@ class SearchActivity : AppCompatActivity(), SearchView {
             SortBy.YEAR -> SongModel::year
         })
 
-        binding.sort.setTextColor(when (appState.sortBy) {
-            SortBy.NONE -> ContextCompat.getColor(this, R.color.primary_text)
-            else -> ContextCompat.getColor(this, R.color.red)
-        })
+        activateLabel(binding.sort, appState.sortBy != SortBy.NONE)
+    }
 
-        binding.sort.bold(when (appState.sortBy) {
-            SortBy.NONE -> false
-            else -> true
-        })
+    private fun activateLabel(label: TextView, enable: Boolean) {
+        label.apply {
+            setTextColor(ContextCompat.getColor(context, if (enable) R.color.red else R.color.primary_text))
+            bold(enable)
+        }
     }
 
     private fun createSearchPresenter() =

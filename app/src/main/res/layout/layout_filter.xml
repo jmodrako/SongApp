@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout>
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/bottom_sheet"
@@ -16,15 +17,37 @@
         app:layout_behavior="android.support.design.widget.BottomSheetBehavior"
         tools:showIn="@layout/activity_search">
 
-        <TextView
+        <include
+            android:id="@+id/filter_genre"
+            app:label='@{"Genre"}'
+            layout="@layout/layout_spinner_with_label" />
+
+        <include
+            android:id="@+id/filter_artist"
+            app:label='@{"Artist"}'
+            layout="@layout/layout_spinner_with_label" />
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="6dp"
-            android:fontFamily="sans-serif-medium"
-            android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-            android:text="@string/filter"
-            android:textColor="@color/secondary_text"
-            android:textSize="14sp" />
+            android:layout_gravity="end|bottom"
+            android:orientation="horizontal">
 
+            <Button
+                android:id="@+id/filter_clear"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/clear"
+                android:textColor="@color/primary_dark" />
+
+            <Button
+                android:id="@+id/filter_close"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/close"
+                android:textColor="@color/secondary_text" />
+        </LinearLayout>
     </LinearLayout>
 </layout>

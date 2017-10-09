@@ -53,6 +53,19 @@ class SearchAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder>() {
 
         notifyDataSetChanged()
     }
+
+    fun filterBy(filterValues: MutableCollection<FilterDefinition>) {
+        val filtered = if (filterValues.isEmpty()) {
+            originalData
+        } else {
+            originalData.filter { song -> filterValues.any { filter -> filter(song) } }
+        }
+
+        currentData.clear()
+        currentData.addAll(filtered)
+
+        notifyDataSetChanged()
+    }
 }
 
 sealed class BaseViewHolder(binding: ViewDataBinding) : RecyclerView.ViewHolder(binding.root)
