@@ -7,12 +7,9 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
 import android.view.MotionEvent
-import android.view.View
 import android.view.inputmethod.EditorInfo
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.RadioButton
-import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import com.jakewharton.rxbinding2.widget.RxTextView
@@ -24,8 +21,12 @@ import com.tooploox.songapp.common.click
 import com.tooploox.songapp.common.firstCheckedButton
 import com.tooploox.songapp.common.gone
 import com.tooploox.songapp.common.hasText
+import com.tooploox.songapp.common.hideBottomSheet
+import com.tooploox.songapp.common.hideBottomSheetsIfNeeded
 import com.tooploox.songapp.common.hideKeyboard
+import com.tooploox.songapp.common.prepareSpinnerUtil
 import com.tooploox.songapp.common.retype
+import com.tooploox.songapp.common.setupInitialBottomSheet
 import com.tooploox.songapp.common.toast
 import com.tooploox.songapp.common.uncheckAllButtons
 import com.tooploox.songapp.common.views
@@ -78,16 +79,16 @@ class SearchActivity : AppCompatActivity(), SearchView {
         binding = bindContentView(R.layout.activity_search)
         presenter = createSearchPresenter()
 
-        setupInitialBottomSheet(filterBottomSheet, binding.filter)
-        setupInitialBottomSheet(sortBottomSheet, binding.sort)
-        setupInitialBottomSheet(settingsBottomSheet, binding.settings)
+        setupInitialBottomSheet(allBottomSheets, filterBottomSheet, binding.filter)
+        setupInitialBottomSheet(allBottomSheets, sortBottomSheet, binding.sort)
+        setupInitialBottomSheet(allBottomSheets, settingsBottomSheet, binding.settings)
 
         setupSorting()
         setupFiltering()
         setupLoadingIndicator()
 
         setupSearchInput()
-        setupSettings()
+        setupDataSourceSettings()
         setupSearchResultsList()
     }
 
@@ -132,15 +133,9 @@ class SearchActivity : AppCompatActivity(), SearchView {
     }
 
     override fun onBackPressed() {
-        if (!hideBottomSheetsIfNeeded()) {
+        if (!hideBottomSheetsIfNeeded(allBottomSheets)) {
             super.onBackPressed()
         }
-    }
-
-    private fun hideBottomSheetsIfNeeded(): Boolean {
-        val isAnySheetOpened = allBottomSheets.any { it.state == BottomSheetBehavior.STATE_EXPANDED }
-        hideAllSheets()
-        return isAnySheetOpened
     }
 
     private fun showResultCountLabel(count: Int) {
@@ -148,7 +143,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
     }
 
     private fun setupLoadingIndicator() {
-        binding.swipeRefresh.apply {
+        binding.swipeRefresh.run {
             isRefreshing = false
             isEnabled = false
         }
@@ -203,7 +198,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
             val spinnerData = filteredMap.map { "${it.key} (${it.value.size})" }.sorted()
             val finalData = listOf("${getString(R.string.all)} (${spinnerData.size})") + spinnerData
 
-            prepareSpinner(finalData, spinnerBinding.spinner,
+            prepareSpinnerUtil(this, finalData, spinnerBinding.spinner,
                 clickCallback = { clickedFilter ->
                     searchState.registerFilter(filterKey, { song -> songPredicate(song, clickedFilter) })
                     refreshListFromFilterBy()
@@ -231,31 +226,6 @@ class SearchActivity : AppCompatActivity(), SearchView {
             binding.bottomSheetFilter.filterGenre.spinner.setSelection(0)
 
             hideBottomSheet(filterBottomSheet)
-        }
-    }
-
-    private fun prepareSpinner(
-        data: List<String>, spinner: Spinner,
-        clickCallback: (String) -> Unit,
-        defaultCallback: () -> Unit) {
-
-        val adapter = ArrayAdapter<String>(this,
-            android.R.layout.simple_list_item_1, android.R.id.text1).apply {
-            addAll(data)
-        }
-
-        spinner.adapter = adapter
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                if (position == 0) {
-                    defaultCallback()
-                } else {
-                    val clickedLabel = data[position]
-                    val clickedItem = clickedLabel.take(clickedLabel.lastIndexOf(" "))
-                    clickCallback(clickedItem)
-                }
-            }
         }
     }
 
@@ -298,12 +268,11 @@ class SearchActivity : AppCompatActivity(), SearchView {
         refreshListFromSortBy()
     }
 
-    private fun activateLabel(label: TextView, enable: Boolean) {
-        label.apply {
+    private fun activateLabel(label: TextView, enable: Boolean) =
+        label.run {
             setTextColor(ContextCompat.getColor(context, if (enable) R.color.red else R.color.primary_text))
             bold(enable)
         }
-    }
 
     /**
      * Could be done via Dagger 2.
@@ -320,7 +289,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
 
     private fun showEmptyLayoutWithMessage(newMessage: String) {
         binding.recyclerView.gone()
-        binding.emptyLayout.apply {
+        binding.emptyLayout.run {
             message = newMessage
             root.visible()
         }
@@ -330,7 +299,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
     private fun setupSearchResultsList() {
         listAdapter.registerAdapterDataObserver(adapterDataObserver)
 
-        binding.recyclerView.apply {
+        binding.recyclerView.run {
             withVerticalManager()
             adapter = listAdapter
         }
@@ -345,32 +314,10 @@ class SearchActivity : AppCompatActivity(), SearchView {
         }
     }
 
-    private fun setupInitialBottomSheet(bottomSheet: BottomSheetBehavior<*>, sheetTrigger: View) {
-        bottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
-
-        sheetTrigger.click {
-            bottomSheet.state =
-                if (bottomSheet.state != BottomSheetBehavior.STATE_HIDDEN) BottomSheetBehavior.STATE_HIDDEN
-                else BottomSheetBehavior.STATE_EXPANDED
-
-            hideAllSheets(bottomSheet)
-        }
-    }
-
-    private fun hideAllSheets(bottomSheetToStayOpen: BottomSheetBehavior<*>? = null) {
-        allBottomSheets
-            .filter { it != bottomSheetToStayOpen }
-            .forEach { it.state = BottomSheetBehavior.STATE_HIDDEN }
-    }
-
-    private fun hideBottomSheet(bottomSheet: BottomSheetBehavior<*>) {
-        bottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
-    }
-
     /**
      * There is no easy way to create RadioGroup with dynamic buttons in it...
      */
-    private fun setupSettings() {
+    private fun setupDataSourceSettings() {
         val radioGroup = binding.bottomSheetSettings.dataSourceRadioGroup
         val values = DataSourceEnum.values()
 
@@ -402,7 +349,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
     }
 
     private fun setupSearchInput() {
-        binding.searchInput.apply {
+        binding.searchInput.run {
             setOnEditorActionListener { _, actionId, _ ->
                 when (actionId) {
                     EditorInfo.IME_ACTION_SEARCH -> {
@@ -414,7 +361,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
             }
 
             setOnFocusChangeListener { _, hasFocus ->
-                if (hasFocus) hideBottomSheetsIfNeeded()
+                if (hasFocus) hideBottomSheetsIfNeeded(allBottomSheets)
             }
         }
 
