@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <LinearLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/bottom_sheet"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:behavior_hideable="true"
+        android:elevation="6dp"
+        android:padding="16dp"
+        android:background="@android:color/white"
+        app:layout_behavior="android.support.design.widget.BottomSheetBehavior"
+        tools:showIn="@layout/activity_search">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-medium"
+            android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+            android:layout_marginBottom="-6dp"
+            android:text="@string/data_source"
+            android:textColor="@color/secondary_text" />
+
+        <Spinner
+            android:id="@+id/data_source_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|bottom"
+            android:fontFamily="sans-serif-smallcaps"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="8dp"
+            android:gravity="center"
+            android:text="@string/author_info"
+            android:textColor="@color/secondary_text"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+</layout>

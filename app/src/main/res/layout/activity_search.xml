@@ -84,6 +84,7 @@
                     android:textColor="@color/secondary_text" />
 
                 <TextView
+                    android:id="@+id/filter"
                     android:layout_width="0dp"
                     android:layout_weight="0.3"
                     android:layout_height="wrap_content"
@@ -96,11 +97,12 @@
                     android:textSize="14sp" />
 
                 <TextView
+                    android:id="@+id/sort"
                     android:layout_width="0dp"
                     android:layout_weight="0.3"
                     android:gravity="center"
                     android:layout_height="wrap_content"
-                    android:text="Sort"
+                    android:text="@string/sort"
                     android:padding="8dp"
                     android:textSize="14sp"
                     android:textColor="@color/search_filter_sort_label_text_color_selector"
@@ -134,47 +136,17 @@
                 layout="@layout/empty_list"
                 app:message='@{@string/type_query_to_find_song}' />
 
-            <LinearLayout
-                android:id="@+id/bottom_sheet"
-                android:gravity="center_vertical"
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:behavior_hideable="true"
-                android:elevation="6dp"
-                android:padding="16dp"
-                android:background="@android:color/white"
-                app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
+            <include
+                android:id="@+id/bottom_sheet_settings"
+                layout="@layout/layout_settings" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:fontFamily="sans-serif-medium"
-                    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-                    android:layout_marginBottom="-6dp"
-                    android:text="@string/data_source"
-                    android:textColor="@color/secondary_text" />
+            <include
+                android:id="@+id/bottom_sheet_filter"
+                layout="@layout/layout_filter" />
 
-                <Spinner
-                    android:id="@+id/data_source_spinner"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal|bottom"
-                    android:fontFamily="sans-serif-smallcaps"
-                    android:layout_marginTop="12dp"
-                    android:layout_marginBottom="8dp"
-                    android:gravity="center"
-                    android:text="Created by Jacek Modrakowski\nTooploox.com, 2017"
-                    android:textColor="@color/secondary_text"
-                    android:textSize="12sp" />
-
-            </LinearLayout>
-
+            <include
+                android:id="@+id/bottom_sheet_sort"
+                layout="@layout/layout_sort" />
         </android.support.design.widget.CoordinatorLayout>
     </LinearLayout>
 </layout>

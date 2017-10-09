@@ -36,7 +36,9 @@ class SearchActivity : AppCompatActivity(), SearchView {
     private lateinit var binding: ActivitySearchBinding
 
     private val listAdapter by lazy { SearchAdapter(this) }
-    private val settings by lazy { BottomSheetBehavior.from(binding.bottomSheet) }
+    private val settingsBottomSheet by lazy { BottomSheetBehavior.from(binding.bottomSheetSettings.bottomSheet) }
+    private val filterBottomSheet by lazy { BottomSheetBehavior.from(binding.bottomSheetFilter.bottomSheet) }
+    private val sortBottomSheet by lazy { BottomSheetBehavior.from(binding.bottomSheetSort.bottomSheet) }
 
     private val compositeDisposable = CompositeDisposable()
     private var dataSource = DataSourceEnum.REMOTE
@@ -46,7 +48,10 @@ class SearchActivity : AppCompatActivity(), SearchView {
         binding = bindContentView(R.layout.activity_search)
         presenter = createSearchPresenter()
 
-        setupSettings()
+        setupInitialBottomSheet(filterBottomSheet, binding.filter)
+        setupInitialBottomSheet(sortBottomSheet, binding.sort)
+        setupInitialBottomSheet(settingsBottomSheet, binding.settings)
+
         setupSearchInput()
         setupSearchDataSourceSpinner()
         setupSearchResultsList()
@@ -123,18 +128,18 @@ class SearchActivity : AppCompatActivity(), SearchView {
         }
     }
 
-    private fun setupSettings() {
-        settings.state = BottomSheetBehavior.STATE_HIDDEN
+    private fun setupInitialBottomSheet(bottomSheet: BottomSheetBehavior<*>, sheetTrigger: View) {
+        bottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
 
-        binding.settings.click {
-            settings.state =
-                if (settings.state != BottomSheetBehavior.STATE_HIDDEN) BottomSheetBehavior.STATE_HIDDEN
+        sheetTrigger.click {
+            bottomSheet.state =
+                if (bottomSheet.state != BottomSheetBehavior.STATE_HIDDEN) BottomSheetBehavior.STATE_HIDDEN
                 else BottomSheetBehavior.STATE_EXPANDED
         }
     }
 
-    private fun hideSettings() {
-        settings.state = BottomSheetBehavior.STATE_HIDDEN
+    private fun hideBottomSheet(bottomSheet: BottomSheetBehavior<*>) {
+        bottomSheet.state = BottomSheetBehavior.STATE_HIDDEN
     }
 
     private fun setupSearchDataSourceSpinner() {
@@ -145,16 +150,16 @@ class SearchActivity : AppCompatActivity(), SearchView {
             addAll(items)
         }
 
-        binding.dataSourceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        binding.bottomSheetSettings.dataSourceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 dataSource = sources[position]
-                hideSettings()
+                hideBottomSheet(settingsBottomSheet)
 
                 binding.searchInput.retype()
             }
         }
-        binding.dataSourceSpinner.adapter = adapter
+        binding.bottomSheetSettings.dataSourceSpinner.adapter = adapter
     }
 
     private fun setupSearchInput() {
@@ -171,7 +176,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
         }
 
         binding.clearSearchInput.click {
-            binding.searchResultCount.setText("")
+            binding.searchResultCount.text = ""
             binding.searchInput.setText("")
             binding.searchInput.requestFocus()
         }
