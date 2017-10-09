@@ -1,11 +1,13 @@
 package com.tooploox.songapp.search
 
+import com.tooploox.songapp.data.DataSource
+
 class SearchState {
 
     var sortBy: SortBy = SortBy.NONE
         private set
 
-    var dataSource: DataSourceEnum = DataSourceEnum.default()
+    var dataSource: DataSource.Type = DataSource.Type.default()
         private set
 
     private var filtersMap: MutableMap<String, FilterDefinition> = mutableMapOf()
@@ -28,7 +30,7 @@ class SearchState {
 
     fun filtersDefinitions(): MutableCollection<FilterDefinition> = filtersMap.values
 
-    fun updateDataSource(newDataSource: DataSourceEnum) {
+    fun updateDataSource(newDataSource: DataSource.Type) {
         dataSource = newDataSource
     }
 

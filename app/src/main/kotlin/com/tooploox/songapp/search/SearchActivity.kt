@@ -32,6 +32,7 @@ import com.tooploox.songapp.common.uncheckAllButtons
 import com.tooploox.songapp.common.views
 import com.tooploox.songapp.common.visible
 import com.tooploox.songapp.common.withVerticalManager
+import com.tooploox.songapp.data.DataSource
 import com.tooploox.songapp.data.SongModel
 import com.tooploox.songapp.data.local.AssetsProvider
 import com.tooploox.songapp.data.local.LocalDataSource
@@ -277,8 +278,8 @@ class SearchActivity : AppCompatActivity(), SearchView {
      */
     private fun createSearchPresenter() =
         SearchPresenter(mapOf(
-            DataSourceEnum.LOCAL to LocalDataSource(AssetsProvider(this)),
-            DataSourceEnum.REMOTE to RemoteDataSource()))
+            DataSource.Type.LOCAL to LocalDataSource(AssetsProvider(this)),
+            DataSource.Type.REMOTE to RemoteDataSource()))
 
     private fun hideEmptyLayout() {
         binding.recyclerView.visible()
@@ -317,11 +318,11 @@ class SearchActivity : AppCompatActivity(), SearchView {
      */
     private fun setupDataSourceSettings() {
         val radioGroup = binding.bottomSheetSettings.dataSourceRadioGroup
-        val values = DataSourceEnum.values()
+        val values = DataSource.Type.values()
 
         radioGroup.setOnCheckedChangeListener({ _, _ ->
             val firstCheckedButton = radioGroup.firstCheckedButton()
-            val checkedDataSource = firstCheckedButton.tag as DataSourceEnum
+            val checkedDataSource = firstCheckedButton.tag as DataSource.Type
 
             searchState.updateDataSource(checkedDataSource)
             hideBottomSheet(settingsBottomSheet)
@@ -342,7 +343,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
             radioGroup.addView(radioBtn)
         }
 
-        val indexToCheck = values.first(DataSourceEnum::default).ordinal
+        val indexToCheck = values.first(DataSource.Type::default).ordinal
         (radioGroup.views[indexToCheck] as RadioButton).isChecked = true
     }
 
