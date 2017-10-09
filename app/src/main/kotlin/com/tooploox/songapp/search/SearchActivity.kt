@@ -69,10 +69,59 @@ class SearchActivity : AppCompatActivity(), SearchView {
         setupInitialBottomSheet(settingsBottomSheet, binding.settings)
 
         setupSorting()
+        // TODO: setupFiltering()
+        setupLoadingIndicator()
 
         setupSearchInput()
         setupSearchDataSourceSpinner()
         setupSearchResultsList()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        presenter.attach(this)
+    }
+
+    override fun onStop() {
+        presenter.detach()
+        compositeDisposable.clear()
+        super.onStop()
+    }
+
+    override fun showLoading(show: Boolean) {
+        binding.swipeRefresh.isRefreshing = show
+    }
+
+    override fun showInitialEmptyView() {
+        listAdapter.clearData()
+        listAdapter.notifyDataSetChanged()
+        showEmptyLayoutWithMessage(getString(R.string.type_query_to_find_song))
+    }
+
+    override fun showSearchResults(results: List<SongModel>) {
+        binding.searchResultCount.text = getString(R.string.search_result_count, results.size)
+
+        listAdapter.clearData()
+
+        if (results.isEmpty()) {
+            showEmptyLayoutWithMessage(getString(R.string.cant_find_song))
+        } else {
+            hideEmptyLayout()
+
+            listAdapter.updateData(results)
+            listAdapter.notifyDataSetChanged()
+        }
+    }
+
+    override fun showSearchError() {
+        toast(getString(R.string.something_went_wrong), Toast.LENGTH_SHORT)
+    }
+
+    private fun setupLoadingIndicator() {
+        binding.swipeRefresh.apply {
+            isRefreshing = false
+            isEnabled = false
+        }
     }
 
     private fun setupSorting() {
@@ -125,38 +174,6 @@ class SearchActivity : AppCompatActivity(), SearchView {
             DataSourceEnum.LOCAL to LocalDataSource(AssetsProvider(this)),
             DataSourceEnum.REMOTE to RemoteDataSource()))
 
-    override fun onStart() {
-        super.onStart()
-        presenter.attach(this)
-    }
-
-    override fun onStop() {
-        presenter.detach()
-        compositeDisposable.clear()
-        super.onStop()
-    }
-
-    override fun showInitialEmptyView() {
-        listAdapter.clearData()
-        listAdapter.notifyDataSetChanged()
-        showEmptyLayoutWithMessage(getString(R.string.type_query_to_find_song))
-    }
-
-    override fun showSearchResults(results: List<SongModel>) {
-        binding.searchResultCount.text = getString(R.string.search_result_count, results.size)
-
-        listAdapter.clearData()
-
-        if (results.isEmpty()) {
-            showEmptyLayoutWithMessage(getString(R.string.cant_find_song))
-        } else {
-            hideEmptyLayout()
-
-            listAdapter.updateData(results)
-            listAdapter.notifyDataSetChanged()
-        }
-    }
-
     private fun hideEmptyLayout() {
         binding.recyclerView.visible()
         binding.emptyLayout.root.gone()
@@ -168,10 +185,6 @@ class SearchActivity : AppCompatActivity(), SearchView {
             message = newMessage
             root.visible()
         }
-    }
-
-    override fun showSearchError() {
-        toast(getString(R.string.something_went_wrong), Toast.LENGTH_SHORT)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -257,7 +270,9 @@ class SearchActivity : AppCompatActivity(), SearchView {
                 appState.query = it
 
                 if (it.isEmpty()) binding.clearSearchInput.gone()
-                else binding.clearSearchInput.visible()
+                else {
+                    binding.clearSearchInput.visible()
+                }
             }
             .subscribe({ presenter.handleSearchQuery(it, appState.dataSource) })
             .addToDisposable(compositeDisposable)

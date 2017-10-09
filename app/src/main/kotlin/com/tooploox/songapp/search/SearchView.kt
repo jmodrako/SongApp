@@ -7,4 +7,5 @@ interface SearchView : BaseView {
     fun showSearchResults(results: List<SongModel>)
     fun showSearchError()
     fun showInitialEmptyView()
+    fun showLoading(show: Boolean)
 }

@@ -26,17 +26,28 @@ class SearchPresenter(private val dataSourcesMap: Map<DataSourceEnum, DataSource
             .switchMap { chooseDataSource(it.first, it.second).toObservable() }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io())
-            .subscribe({ withView { showSearchResults(it) } }, {
-                it.printStackTrace()
-                withView { showSearchError() }
+            .subscribe({
+                withView {
+                    showLoading(false)
+                    showSearchResults(it)
+                }
+            }, {
+                withView {
+                    showLoading(false)
+                    showSearchError()
+                }
             })
             .addToDisposable(disposables)
     }
 
     fun handleSearchQuery(query: String, dataSourceEnum: DataSourceEnum) {
         if (query.isEmpty()) {
-            withView { showInitialEmptyView() }
+            withView {
+                showLoading(false)
+                showInitialEmptyView()
+            }
         } else {
+            withView { showLoading(true) }
             subject.onNext(dataSourceEnum to query)
         }
     }

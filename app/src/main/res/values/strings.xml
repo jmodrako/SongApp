@@ -5,7 +5,7 @@
     <string name="cant_find_song">We can\'t find any song.</string>
     <string name="something_went_wrong">Something went wrong…</string>
     <string name="type_query_to_find_song">Type query and results\nwill be listed here.</string>
-    <string name="search_result_count">Found %1$d results</string>
+    <string name="search_result_count">Found %1$d songs</string>
     <string name="author_info">Created by Jacek Modrakowski\nTooploox.com, 2017</string>
     <string name="sort">Sort</string>
     <string name="filter">Filter</string>
