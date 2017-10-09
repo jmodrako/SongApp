@@ -149,35 +149,6 @@ class SearchActivity : AppCompatActivity(), SearchView {
         }
     }
 
-    private fun setupSorting() {
-        SortBy.values()
-            .filter(SortBy::visible)
-            .forEach {
-                val radioBtn = RadioButton(this).apply {
-                    text = it.name.toLowerCase().capitalize()
-                    click {
-                        searchState.sortBy = it
-                        refreshListFromSortBy()
-                    }
-                }
-
-                binding.bottomSheetSort.sortRadioGroup.addView(radioBtn)
-            }
-
-        binding.bottomSheetSort.sortClear.click {
-            binding.bottomSheetSort.sortRadioGroup.views
-                .filterIsInstance(RadioButton::class.java)
-                .forEach { it.isChecked = false }
-
-            searchState.sortBy = SortBy.NONE
-            refreshListFromSortBy()
-
-            hideBottomSheet(sortBottomSheet)
-        }
-
-        binding.bottomSheetSort.sortClose.click { hideBottomSheet(sortBottomSheet) }
-    }
-
     private fun createFilters(data: List<SongModel>) {
         prepareFilterSpinner("artist", { song, clickedFilter -> song.artist == clickedFilter },
             data.groupBy(SongModel::artist), binding.bottomSheetFilter.filterArtist)
@@ -214,6 +185,31 @@ class SearchActivity : AppCompatActivity(), SearchView {
         }
     }
 
+    private fun setupSorting() {
+        SortBy.values()
+            .filter(SortBy::visible)
+            .forEach {
+                val radioBtn = RadioButton(this).apply {
+                    text = it.name.toLowerCase().capitalize()
+                    click {
+                        searchState.sortBy = it
+                        refreshListFromSortBy()
+                    }
+                }
+
+                binding.bottomSheetSort.sortRadioGroup.addView(radioBtn)
+            }
+
+        binding.bottomSheetSort.sortClear.click {
+            clearSort()
+            hideBottomSheet(sortBottomSheet)
+        }
+
+        binding.bottomSheetSort.sortClose.click {
+            hideBottomSheet(sortBottomSheet)
+        }
+    }
+
     private fun setupFiltering() {
         binding.bottomSheetFilter.filterClose.click {
             hideBottomSheet(filterBottomSheet)
@@ -222,8 +218,10 @@ class SearchActivity : AppCompatActivity(), SearchView {
         binding.bottomSheetFilter.filterClear.click {
             searchState.clearFilters()
 
-            binding.bottomSheetFilter.filterArtist.spinner.setSelection(0)
-            binding.bottomSheetFilter.filterGenre.spinner.setSelection(0)
+            binding.bottomSheetFilter.run {
+                filterArtist.spinner.setSelection(0)
+                filterGenre.spinner.setSelection(0)
+            }
 
             hideBottomSheet(filterBottomSheet)
         }
@@ -385,9 +383,8 @@ class SearchActivity : AppCompatActivity(), SearchView {
                 searchState.updateSearchQuery(it)
 
                 if (it.isEmpty()) binding.clearSearchInput.gone()
-                else {
-                    binding.clearSearchInput.visible()
-                }
+                else binding.clearSearchInput.visible()
+
             }
             .subscribe({ presenter.handleSearchQuery(it, searchState.dataSource) })
             .addToDisposable(compositeDisposable)
