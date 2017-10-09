@@ -44,13 +44,18 @@ class SearchActivity : AppCompatActivity(), SearchView {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = bindContentView(R.layout.activity_search)
-        presenter = SearchPresenter(LocalDataSource(AssetsProvider(this)), RemoteDataSource())
+        presenter = createSearchPresenter()
 
         setupSettings()
         setupSearchInput()
         setupSearchDataSourceSpinner()
         setupSearchResultsList()
     }
+
+    private fun createSearchPresenter() =
+        SearchPresenter(mapOf(
+            DataSourceEnum.LOCAL to LocalDataSource(AssetsProvider(this)),
+            DataSourceEnum.REMOTE to RemoteDataSource()))
 
     override fun onStart() {
         super.onStart()
@@ -70,6 +75,8 @@ class SearchActivity : AppCompatActivity(), SearchView {
     }
 
     override fun showSearchResults(results: List<SongModel>) {
+        binding.searchResultCount.text = getString(R.string.search_result_count, results.size)
+
         listAdapter.clearData()
 
         if (results.isEmpty()) {
@@ -164,6 +171,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
         }
 
         binding.clearSearchInput.click {
+            binding.searchResultCount.setText("")
             binding.searchInput.setText("")
             binding.searchInput.requestFocus()
         }

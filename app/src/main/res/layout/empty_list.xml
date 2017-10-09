@@ -18,6 +18,7 @@
 
         <ImageView
             android:layout_width="224dp"
+            android:layout_marginTop="-64dp"
             android:layout_height="wrap_content"
             android:scaleType="centerInside"
             android:src="@drawable/ic_empty_list"

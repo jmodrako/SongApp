@@ -6,20 +6,17 @@ import com.tooploox.songapp.data.DataSource
 import com.tooploox.songapp.data.SongModel
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import java.util.concurrent.TimeUnit
 
 enum class DataSourceEnum {
-    LOCAL, REMOTE, BOTH
+    LOCAL, REMOTE, ALL
 }
 
 typealias SearchQuery = Pair<DataSourceEnum, String>
 
-class SearchPresenter(
-    private val localDataSource: DataSource,
-    private val remoteDataSource: DataSource) : BasePresenter<SearchView>() {
+class SearchPresenter(private val dataSourcesMap: Map<DataSourceEnum, DataSource>) : BasePresenter<SearchView>() {
 
     private val subject = PublishSubject.create<SearchQuery>()
 
@@ -29,7 +26,10 @@ class SearchPresenter(
             .switchMap { chooseDataSource(it.first, it.second).toObservable() }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io())
-            .subscribe({ withView { showSearchResults(it) } }, { withView { showSearchError() } })
+            .subscribe({ withView { showSearchResults(it) } }, {
+                it.printStackTrace()
+                withView { showSearchError() }
+            })
             .addToDisposable(disposables)
     }
 
@@ -41,11 +41,18 @@ class SearchPresenter(
         }
     }
 
+    @SuppressWarnings("unchecked")
     private fun chooseDataSource(dataSourceEnum: DataSourceEnum, query: String): Single<List<SongModel>> =
         when (dataSourceEnum) {
-            DataSourceEnum.LOCAL -> localDataSource.search(query)
-            DataSourceEnum.REMOTE -> remoteDataSource.search(query)
-            DataSourceEnum.BOTH -> Single.zip(localDataSource.search(query), remoteDataSource.search(query),
-                BiFunction { localData, remoteData -> localData.plus(remoteData) })
+            DataSourceEnum.ALL -> {
+                val allSources = dataSourcesMap.map { it.value.search(query) }
+                Single.zip(allSources, {
+                    it.fold(emptyList<SongModel>(),
+                        { acc, result -> acc + result as List<SongModel> })
+                })
+            }
+            else -> {
+                dataSourcesMap[dataSourceEnum]?.search(query) ?: chooseDataSource(DataSourceEnum.ALL, query)
+            }
         }
 }

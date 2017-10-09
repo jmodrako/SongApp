@@ -6,6 +6,6 @@ import retrofit2.http.Query
 
 internal interface Api {
 
-    @GET("search")
+    @GET("search?entity=song")
     fun search(@Query("term") query: String, @Query("limit") limit: Int): Single<ApiSearchModel>
 }

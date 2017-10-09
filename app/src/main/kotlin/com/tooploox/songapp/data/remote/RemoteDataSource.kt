@@ -62,7 +62,7 @@ class RemoteDataSource : DataSource {
 
     companion object {
         private const val API_URL = "https://itunes.apple.com/"
-        private const val API_RESPONSE_LIMIT = 30
+        private const val API_RESPONSE_LIMIT = 50
     }
 }
 
