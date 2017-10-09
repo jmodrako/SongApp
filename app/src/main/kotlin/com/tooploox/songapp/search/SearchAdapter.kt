@@ -47,8 +47,14 @@ class SearchAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder>() {
         updateData(originalData)
     }
 
-    fun clearData() {
+    fun clearCurrentData() {
         currentData.clear()
+    }
+
+    fun clearAllData() {
+        currentData.clear()
+        originalData = emptyList()
+        notifyDataSetChanged()
     }
 
     fun isEmpty() = currentData.isEmpty()

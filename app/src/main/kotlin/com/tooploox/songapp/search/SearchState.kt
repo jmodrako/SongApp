@@ -18,6 +18,10 @@ data class SearchState(
 
     fun clearFilters() = filtersMap.clear()
 
+    fun clearSort() {
+        sortBy = SortBy.NONE
+    }
+
     fun filtersDefinitions(): MutableCollection<FilterDefinition> = filtersMap.values
 
     fun updateDataSource(newDataSource: DataSourceEnum) {

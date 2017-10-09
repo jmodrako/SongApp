@@ -27,6 +27,7 @@ import com.tooploox.songapp.common.hasText
 import com.tooploox.songapp.common.hideKeyboard
 import com.tooploox.songapp.common.retype
 import com.tooploox.songapp.common.toast
+import com.tooploox.songapp.common.uncheckAllButtons
 import com.tooploox.songapp.common.views
 import com.tooploox.songapp.common.visible
 import com.tooploox.songapp.common.withVerticalManager
@@ -107,13 +108,13 @@ class SearchActivity : AppCompatActivity(), SearchView {
     }
 
     override fun showInitialEmptyView() {
-        listAdapter.clearData()
+        listAdapter.clearCurrentData()
         listAdapter.notifyDataSetChanged()
         showEmptyLayoutWithMessage(getString(R.string.type_query_to_find_song))
     }
 
     override fun showSearchResults(results: List<SongModel>) {
-        listAdapter.clearData()
+        listAdapter.clearCurrentData()
 
         if (results.isEmpty()) {
             showEmptyLayoutWithMessage(getString(R.string.cant_find_song))
@@ -131,13 +132,15 @@ class SearchActivity : AppCompatActivity(), SearchView {
     }
 
     override fun onBackPressed() {
-        val isAnySheetOpened = allBottomSheets.any { it.state == BottomSheetBehavior.STATE_EXPANDED }
-
-        if (isAnySheetOpened) {
-            hideAllSheets()
-        } else {
+        if (!hideBottomSheetsIfNeeded()) {
             super.onBackPressed()
         }
+    }
+
+    private fun hideBottomSheetsIfNeeded(): Boolean {
+        val isAnySheetOpened = allBottomSheets.any { it.state == BottomSheetBehavior.STATE_EXPANDED }
+        hideAllSheets()
+        return isAnySheetOpened
     }
 
     private fun showResultCountLabel(count: Int) {
@@ -277,6 +280,24 @@ class SearchActivity : AppCompatActivity(), SearchView {
         activateLabel(binding.sort, searchState.sortBy != SortBy.NONE)
     }
 
+    private fun clearFilters() {
+        binding.bottomSheetFilter.run {
+            (filterArtist.spinner.adapter as ArrayAdapter<*>).clear()
+            (filterGenre.spinner.adapter as ArrayAdapter<*>).clear()
+
+            filterArtist.root.gone()
+            filterGenre.root.gone()
+        }
+        searchState.clearFilters()
+        refreshListFromFilterBy()
+    }
+
+    private fun clearSort() {
+        binding.bottomSheetSort.sortRadioGroup.uncheckAllButtons()
+        searchState.clearSort()
+        refreshListFromSortBy()
+    }
+
     private fun activateLabel(label: TextView, enable: Boolean) {
         label.apply {
             setTextColor(ContextCompat.getColor(context, if (enable) R.color.red else R.color.primary_text))
@@ -388,9 +409,18 @@ class SearchActivity : AppCompatActivity(), SearchView {
                     else -> false
                 }
             }
+
+            setOnFocusChangeListener { _, hasFocus ->
+                if (hasFocus) hideBottomSheetsIfNeeded()
+            }
         }
 
         binding.clearSearchInput.click {
+            listAdapter.clearAllData()
+
+            clearFilters()
+            clearSort()
+
             binding.searchResultCount.text = ""
             binding.searchInput.setText("")
             binding.searchInput.requestFocus()
