@@ -192,7 +192,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
                 val radioBtn = RadioButton(this).apply {
                     text = it.name.toLowerCase().capitalize()
                     click {
-                        searchState.sortBy = it
+                        searchState.updateSortBy(it)
                         refreshListFromSortBy()
                     }
                 }
@@ -245,7 +245,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
         listAdapter.updateData(sortedData)
         listAdapter.notifyDataSetChanged()
 
-        activateLabel(binding.sort, searchState.sortBy != SortBy.NONE)
+        activateLabel(binding.sort, searchState.isSortActive())
     }
 
     private fun clearFilters() {
@@ -380,8 +380,6 @@ class SearchActivity : AppCompatActivity(), SearchView {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
-                searchState.updateSearchQuery(it)
-
                 if (it.isEmpty()) binding.clearSearchInput.gone()
                 else binding.clearSearchInput.visible()
 

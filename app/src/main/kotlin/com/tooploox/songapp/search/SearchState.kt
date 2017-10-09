@@ -1,10 +1,14 @@
 package com.tooploox.songapp.search
 
-data class SearchState(
-    var dataSource: DataSourceEnum,
-    var query: String = "",
-    var sortBy: SortBy = SortBy.NONE,
-    private var filtersMap: MutableMap<String, FilterDefinition> = mutableMapOf()) {
+class SearchState {
+
+    var sortBy: SortBy = SortBy.NONE
+        private set
+
+    var dataSource: DataSourceEnum = DataSourceEnum.default()
+        private set
+
+    private var filtersMap: MutableMap<String, FilterDefinition> = mutableMapOf()
 
     fun isSortActive() = sortBy != SortBy.NONE
 
@@ -28,12 +32,11 @@ data class SearchState(
         dataSource = newDataSource
     }
 
-    fun updateSearchQuery(newSearchQuery: String) {
-        query = newSearchQuery
+    fun updateSortBy(newSortBy: SortBy) {
+        sortBy = newSortBy
     }
 
     companion object {
-        fun newState(): SearchState = SearchState(DataSourceEnum.default())
-
+        fun newState(): SearchState = SearchState()
     }
 }
