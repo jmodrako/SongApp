@@ -4,7 +4,7 @@ import com.tooploox.songapp.data.DataSource
 
 class SearchState {
 
-    var sortBy: SortBy = SortBy.NONE
+    var sortBy: SortBy = SortBy.default()
         private set
 
     var dataSource: DataSource.Type = DataSource.Type.default()
@@ -13,6 +13,8 @@ class SearchState {
     private var filtersMap: MutableMap<String, FilterDefinition> = mutableMapOf()
 
     fun isSortActive() = sortBy != SortBy.NONE
+
+    fun isNotDefaultSort() = !sortBy.default
 
     fun isFilterActive() = filtersMap.isNotEmpty()
 
@@ -25,7 +27,7 @@ class SearchState {
     fun clearFilters() = filtersMap.clear()
 
     fun clearSort() {
-        sortBy = SortBy.NONE
+        sortBy = SortBy.default()
     }
 
     fun filtersDefinitions(): MutableCollection<FilterDefinition> = filtersMap.values

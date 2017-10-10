@@ -10,8 +10,8 @@ import android.support.v7.widget.AppCompatRadioButton
 import android.support.v7.widget.RecyclerView
 import android.view.MotionEvent
 import android.view.inputmethod.EditorInfo
-import android.widget.ArrayAdapter
 import android.widget.RadioButton
+import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
 import com.jakewharton.rxbinding2.widget.RxTextView
@@ -19,6 +19,7 @@ import com.tooploox.songapp.R
 import com.tooploox.songapp.common.addToDisposable
 import com.tooploox.songapp.common.bindContentView
 import com.tooploox.songapp.common.bold
+import com.tooploox.songapp.common.clearAdapter
 import com.tooploox.songapp.common.click
 import com.tooploox.songapp.common.firstCheckedButton
 import com.tooploox.songapp.common.gone
@@ -31,7 +32,6 @@ import com.tooploox.songapp.common.retype
 import com.tooploox.songapp.common.safeUnregisterAdapterDataObserver
 import com.tooploox.songapp.common.setupInitialBottomSheet
 import com.tooploox.songapp.common.toast
-import com.tooploox.songapp.common.unCheckAllButtons
 import com.tooploox.songapp.common.views
 import com.tooploox.songapp.common.visible
 import com.tooploox.songapp.common.withVerticalManager
@@ -194,6 +194,16 @@ class SearchActivity : AppCompatActivity(), SearchView {
     }
 
     private fun setupSorting() {
+        val radioGroup = binding.bottomSheetSort.sortRadioGroup
+        radioGroup.setOnCheckedChangeListener({ _, _ ->
+            val firstCheckedButton = radioGroup.firstCheckedButton()
+            val checkedSortBy = firstCheckedButton.tag as SortBy
+
+            searchState.updateSortBy(checkedSortBy)
+            hideBottomSheet(sortBottomSheet)
+            refreshListFromSortBy()
+        })
+
         SortBy.values()
             .filter(SortBy::visible)
             .forEach {
@@ -203,14 +213,18 @@ class SearchActivity : AppCompatActivity(), SearchView {
                     setTextColor(color)
                     buttonTintList = ColorStateList.valueOf(color)
 
-                    click {
+
+                    if (it.default) {
                         searchState.updateSortBy(it)
-                        refreshListFromSortBy()
                     }
+
+                    tag = it
                 }
 
-                binding.bottomSheetSort.sortRadioGroup.addView(radioBtn)
+                radioGroup.addView(radioBtn)
             }
+
+        selectDefaultSortBy(radioGroup)
 
         binding.bottomSheetSort.sortClear.click {
             clearSort()
@@ -220,6 +234,10 @@ class SearchActivity : AppCompatActivity(), SearchView {
         binding.bottomSheetSort.sortClose.click {
             hideBottomSheet(sortBottomSheet)
         }
+    }
+
+    private fun selectDefaultSortBy(radioGroup: RadioGroup) {
+        (radioGroup.views.first { (it.tag as SortBy).default } as RadioButton).isChecked = true
     }
 
     private fun setupFiltering() {
@@ -257,13 +275,13 @@ class SearchActivity : AppCompatActivity(), SearchView {
         listAdapter.updateData(sortedData)
         listAdapter.notifyDataSetChanged()
 
-        activateLabel(binding.sort, searchState.isSortActive())
+        activateLabel(binding.sort, searchState.isNotDefaultSort())
     }
 
     private fun clearFilters() {
         binding.bottomSheetFilter.run {
-            (filterArtist.spinner.adapter as ArrayAdapter<*>).clear()
-            (filterGenre.spinner.adapter as ArrayAdapter<*>).clear()
+            filterArtist.spinner.clearAdapter()
+            filterGenre.spinner.clearAdapter()
 
             filterArtist.root.gone()
             filterGenre.root.gone()
@@ -273,7 +291,8 @@ class SearchActivity : AppCompatActivity(), SearchView {
     }
 
     private fun clearSort() {
-        binding.bottomSheetSort.sortRadioGroup.unCheckAllButtons()
+        selectDefaultSortBy(binding.bottomSheetSort.sortRadioGroup)
+
         searchState.clearSort()
         refreshListFromSortBy()
     }
@@ -329,7 +348,6 @@ class SearchActivity : AppCompatActivity(), SearchView {
      */
     private fun setupDataSourceSettings() {
         val radioGroup = binding.bottomSheetSettings.dataSourceRadioGroup
-        val values = DataSource.Type.values()
 
         radioGroup.setOnCheckedChangeListener({ _, _ ->
             val firstCheckedButton = radioGroup.firstCheckedButton()
@@ -340,25 +358,25 @@ class SearchActivity : AppCompatActivity(), SearchView {
             binding.searchInput.retype()
         })
 
-        values.forEach {
-            val radioBtn = AppCompatRadioButton(this).apply {
-                text = it.name.toLowerCase().capitalize()
-                val color = ContextCompat.getColor(context, R.color.primary_text_white)
-                setTextColor(color)
-                buttonTintList = ColorStateList.valueOf(color)
+        DataSource.Type.values()
+            .forEach {
+                val radioBtn = AppCompatRadioButton(this).apply {
+                    text = it.name.toLowerCase().capitalize()
+                    val color = ContextCompat.getColor(context, R.color.primary_text_white)
+                    setTextColor(color)
+                    buttonTintList = ColorStateList.valueOf(color)
 
-                if (it.default) {
-                    searchState.updateDataSource(it)
+                    if (it.default) {
+                        searchState.updateDataSource(it)
+                    }
+
+                    tag = it
                 }
 
-                tag = it
+                radioGroup.addView(radioBtn)
             }
 
-            radioGroup.addView(radioBtn)
-        }
-
-        val indexToCheck = values.first(DataSource.Type::default).ordinal
-        (radioGroup.views[indexToCheck] as RadioButton).isChecked = true
+        (radioGroup.views.first { (it.tag as DataSource.Type).default } as RadioButton).isChecked = true
     }
 
     private fun setupSearchInput() {

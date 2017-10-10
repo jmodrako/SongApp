@@ -38,3 +38,9 @@ fun prepareSpinnerUtil(
         }
     }
 }
+
+fun Spinner.clearAdapter() {
+    if (adapter != null && adapter is ArrayAdapter<*>) {
+        (adapter as ArrayAdapter<*>).clear()
+    }
+}
