@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import com.tooploox.songapp.R
 import com.tooploox.songapp.data.SongModel
 import com.tooploox.songapp.databinding.ListItemSongBinding
+import kotlin.reflect.KProperty1
 
 class SearchAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder>() {
 
@@ -59,15 +60,8 @@ class SearchAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder>() {
 
     fun isEmpty() = currentData.isEmpty()
 
-    fun sort(data: List<SongModel>, sortBy: SortBy): List<SongModel> {
-        val predicate = when (sortBy) {
-            SortBy.NONE, SortBy.TITLE -> SongModel::title
-            SortBy.AUTHOR -> SongModel::artist
-            SortBy.YEAR -> SongModel::year
-        }
-
-        return data.sortedBy(predicate)
-    }
+    fun sort(data: List<SongModel>, predicate: KProperty1<SongModel, String>): List<SongModel> =
+        data.sortedBy(predicate)
 
     fun filter(data: List<SongModel>, filterValues: MutableCollection<FilterDefinition>) =
         if (filterValues.isEmpty()) {

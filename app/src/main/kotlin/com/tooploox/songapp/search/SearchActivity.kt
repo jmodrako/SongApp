@@ -44,6 +44,7 @@ import com.tooploox.songapp.databinding.LayoutSpinnerWithLabelBinding
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import kotlin.reflect.KProperty1
 
 typealias FilterDefinition = (SongModel) -> Boolean
 typealias SongPredicate = (SongModel, String) -> Boolean
@@ -123,12 +124,19 @@ class SearchActivity : AppCompatActivity(), SearchView {
         if (results.isNotEmpty()) {
             createFilters(results)
 
-            val sortedData = listAdapter.sort(results, searchState.sortBy)
+            val sortedData = listAdapter.sort(results, chooseSortPredicate())
             listAdapter.updateOriginalData(sortedData)
         }
 
         listAdapter.notifyDataSetChanged()
     }
+
+    private fun chooseSortPredicate(): KProperty1<SongModel, String> =
+        when (searchState.sortBy) {
+            SortBy.NONE, SortBy.TITLE -> SongModel::title
+            SortBy.AUTHOR -> SongModel::artist
+            SortBy.YEAR -> SongModel::year
+        }
 
     override fun showSearchError() {
         toast(getString(R.string.something_went_wrong), Toast.LENGTH_SHORT)
@@ -257,7 +265,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
     private fun refreshListFromFilterBy() {
         val filterValues = searchState.filtersDefinitions()
         val filteredData = listAdapter.filter(listAdapter.originalData, filterValues)
-        val finalData = if (searchState.isSortActive()) listAdapter.sort(filteredData, searchState.sortBy) else filteredData
+        val finalData = if (searchState.isSortActive()) listAdapter.sort(filteredData, chooseSortPredicate()) else filteredData
 
         listAdapter.updateData(finalData)
         listAdapter.notifyDataSetChanged()
@@ -267,7 +275,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
 
     private fun refreshListFromSortBy() {
         val toSort = listAdapter.run { if (searchState.isFilterActive()) currentData else originalData }
-        val sortedData = listAdapter.sort(toSort, searchState.sortBy)
+        val sortedData = listAdapter.sort(toSort, chooseSortPredicate())
 
         listAdapter.updateData(sortedData)
         listAdapter.notifyDataSetChanged()
