@@ -41,6 +41,7 @@ import com.tooploox.songapp.data.local.LocalDataSource
 import com.tooploox.songapp.data.remote.RemoteDataSource
 import com.tooploox.songapp.databinding.ActivitySearchBinding
 import com.tooploox.songapp.databinding.LayoutSpinnerWithLabelBinding
+import com.tooploox.songapp.details.DetailsDialogFragment
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -331,6 +332,12 @@ class SearchActivity : AppCompatActivity(), SearchView {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupSearchResultsList() {
+        listAdapter.onItemClickListener = {
+            val detailsDialog = DetailsDialogFragment()
+            detailsDialog.withModel(it)
+            detailsDialog.show(supportFragmentManager, "details-fragment")
+        }
+
         listAdapter.registerAdapterDataObserver(adapterDataObserver)
 
         binding.recyclerView.run {

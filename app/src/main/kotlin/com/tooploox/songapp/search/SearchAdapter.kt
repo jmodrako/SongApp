@@ -7,11 +7,16 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.tooploox.songapp.R
+import com.tooploox.songapp.common.click
 import com.tooploox.songapp.data.SongModel
 import com.tooploox.songapp.databinding.ListItemSongBinding
 import kotlin.reflect.KProperty1
 
+typealias OnItemClickListener = (SongModel) -> Unit
+
 class SearchAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder>() {
+
+    var onItemClickListener: OnItemClickListener? = null
 
     var originalData: List<SongModel> = listOf()
         private set
@@ -25,8 +30,16 @@ class SearchAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder>() {
         SongViewHolder(DataBindingUtil.inflate(layoutInflater, R.layout.list_item_song, parent, false))
 
     override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
+        val model = currentData[position]
+
         when (holder) {
-            is SongViewHolder -> holder.songBinding.model = currentData[position]
+            is SongViewHolder -> holder.songBinding.model = model
+        }
+
+        holder.itemView.click {
+            if (onItemClickListener != null) {
+                onItemClickListener!!.invoke(model)
+            }
         }
     }
 

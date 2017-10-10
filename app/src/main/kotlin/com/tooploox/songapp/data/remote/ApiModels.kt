@@ -8,6 +8,7 @@ internal data class ApiSongModel(
     @SerializedName("trackName") val trackName: String,
     @SerializedName("artworkUrl100") val artworkUrl100: String,
     @SerializedName("primaryGenreName") val primaryGenreName: String,
+    @SerializedName("collectionName") val collectionName: String,
     @SerializedName("releaseDate") private val releaseDate: LocalDateTime? = null
 ) {
     val releaseYear
