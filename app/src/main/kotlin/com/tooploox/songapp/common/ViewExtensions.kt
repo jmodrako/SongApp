@@ -5,6 +5,8 @@ import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.RadioButton
+import android.widget.RadioGroup
 import android.widget.TextView
 
 fun RecyclerView.withVerticalManager() {
@@ -31,6 +33,19 @@ fun EditText.retype() {
     this.setSelection(currentText.length)
 }
 
+val TextView.hasText: Boolean
+    get() = this.text?.isNotBlank() ?: false
+
 fun TextView.bold(bold: Boolean = true) {
     this.typeface = if (bold) android.graphics.Typeface.DEFAULT_BOLD else android.graphics.Typeface.DEFAULT
+}
+
+fun RadioGroup.unCheckAllButtons() = views.map { it as RadioButton }.forEach { it.isChecked = false }
+fun RadioGroup.firstCheckedButton() = views.map { it as RadioButton }.first { it.isChecked }
+
+fun RecyclerView.Adapter<*>.safeUnregisterAdapterDataObserver(observer: RecyclerView.AdapterDataObserver) {
+    try {
+        unregisterAdapterDataObserver(observer)
+    } catch (ignored: Exception) {
+    }
 }

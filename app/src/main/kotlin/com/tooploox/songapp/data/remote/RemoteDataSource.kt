@@ -30,7 +30,7 @@ class RemoteDataSource : DataSource {
             api.search(query, API_RESPONSE_LIMIT)
                 .subscribeOn(Schedulers.io())
                 .flattenAsObservable(ApiSearchModel::results)
-                .map { SongModel(it.trackName, it.artistName, it.releaseYear, it.artworkUrl100) }
+                .map { SongModel(it.trackName, it.artistName, it.releaseYear, it.artworkUrl100, it.primaryGenreName) }
                 .toList()
         }
 

@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout>
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/bottom_sheet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
+        android:background="@color/primary_dark"
         android:elevation="6dp"
         android:gravity="center_vertical"
         android:orientation="vertical"
@@ -19,28 +20,29 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="-6dp"
-            android:fontFamily="sans-serif-medium"
-            android:paddingStart="?android:attr/listPreferredItemPaddingStart"
             android:text="@string/data_source"
-            android:textColor="@color/secondary_text"
+            android:layout_marginBottom="4dp"
+            android:fontFamily="sans-serif-medium"
+            android:textColor="@color/primary_text_white"
             android:textSize="14sp" />
 
-        <Spinner
-            android:id="@+id/data_source_spinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+        <RadioGroup
+            android:id="@+id/data_source_radio_group"
+            android:layout_width="match_parent"
+            android:layout_marginTop="6dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal|bottom"
             android:layout_marginBottom="8dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="16dp"
             android:fontFamily="sans-serif-smallcaps"
             android:gravity="center"
             android:text="@string/author_info"
-            android:textColor="@color/secondary_text"
+            android:textColor="@color/primary_text_white"
             android:textSize="12sp" />
 
     </LinearLayout>

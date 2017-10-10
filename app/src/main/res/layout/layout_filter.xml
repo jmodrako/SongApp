@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout>
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/bottom_sheet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
+        android:background="@color/primary_dark"
         android:elevation="6dp"
         android:gravity="center_vertical"
         android:orientation="vertical"
@@ -16,15 +17,41 @@
         app:layout_behavior="android.support.design.widget.BottomSheetBehavior"
         tools:showIn="@layout/activity_search">
 
-        <TextView
+        <include
+            android:id="@+id/filter_genre"
+            app:label='@{@string/genre}'
+            layout="@layout/layout_spinner_with_label" />
+
+        <Space
+            android:layout_width="12dp"
+            android:layout_height="12dp" />
+
+        <include
+            android:id="@+id/filter_artist"
+            app:label='@{@string/artist}'
+            layout="@layout/layout_spinner_with_label" />
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="6dp"
-            android:fontFamily="sans-serif-medium"
-            android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-            android:text="@string/filter"
-            android:textColor="@color/secondary_text"
-            android:textSize="14sp" />
+            android:layout_gravity="end|bottom"
+            android:orientation="horizontal">
 
+            <Button
+                android:id="@+id/filter_clear"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/clear"
+                android:textColor="@color/accent" />
+
+            <Button
+                android:id="@+id/filter_close"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/close"
+                android:textColor="@color/primary_text_white" />
+        </LinearLayout>
     </LinearLayout>
 </layout>

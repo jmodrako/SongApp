@@ -10,13 +10,9 @@ import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import java.util.concurrent.TimeUnit
 
-enum class DataSourceEnum {
-    LOCAL, REMOTE, ALL
-}
+typealias SearchQuery = Pair<DataSource.Type, String>
 
-typealias SearchQuery = Pair<DataSourceEnum, String>
-
-class SearchPresenter(private val dataSourcesMap: Map<DataSourceEnum, DataSource>) : BasePresenter<SearchView>() {
+class SearchPresenter(private val dataSourcesMap: Map<DataSource.Type, DataSource>) : BasePresenter<SearchView>() {
 
     private val subject = PublishSubject.create<SearchQuery>()
 
@@ -40,7 +36,7 @@ class SearchPresenter(private val dataSourcesMap: Map<DataSourceEnum, DataSource
             .addToDisposable(disposables)
     }
 
-    fun handleSearchQuery(query: String, dataSourceEnum: DataSourceEnum) {
+    fun handleSearchQuery(query: String, dataSourceEnum: DataSource.Type) {
         if (query.isEmpty()) {
             withView {
                 showLoading(false)
@@ -53,9 +49,9 @@ class SearchPresenter(private val dataSourcesMap: Map<DataSourceEnum, DataSource
     }
 
     @SuppressWarnings("unchecked")
-    private fun chooseDataSource(dataSourceEnum: DataSourceEnum, query: String): Single<List<SongModel>> =
-        when (dataSourceEnum) {
-            DataSourceEnum.ALL -> {
+    private fun chooseDataSource(dataSourceType: DataSource.Type, query: String): Single<List<SongModel>> =
+        when (dataSourceType) {
+            DataSource.Type.ALL -> {
                 val allSources = dataSourcesMap.map { it.value.search(query) }
                 Single.zip(allSources, {
                     it.fold(emptyList<SongModel>(),
@@ -63,7 +59,7 @@ class SearchPresenter(private val dataSourcesMap: Map<DataSourceEnum, DataSource
                 })
             }
             else -> {
-                dataSourcesMap[dataSourceEnum]?.search(query) ?: chooseDataSource(DataSourceEnum.ALL, query)
+                dataSourcesMap[dataSourceType]?.search(query) ?: chooseDataSource(DataSource.Type.ALL, query)
             }
         }
 }

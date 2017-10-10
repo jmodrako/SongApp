@@ -9,11 +9,16 @@ import android.view.ViewGroup
 import com.tooploox.songapp.R
 import com.tooploox.songapp.data.SongModel
 import com.tooploox.songapp.databinding.ListItemSongBinding
+import kotlin.reflect.KProperty1
 
 class SearchAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder>() {
 
-    private val originalData: MutableList<SongModel> = mutableListOf()
-    private val currentData: MutableList<SongModel> = mutableListOf()
+    var originalData: List<SongModel> = listOf()
+        private set
+
+    var currentData: MutableList<SongModel> = mutableListOf()
+        private set
+
     private val layoutInflater = LayoutInflater.from(context)
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): BaseViewHolder =
@@ -34,25 +39,36 @@ class SearchAdapter(context: Context) : RecyclerView.Adapter<BaseViewHolder>() {
     override fun getItemCount() = currentData.size
 
     fun updateData(data: List<SongModel>) {
-        originalData.clear()
-        originalData.addAll(data)
-
         currentData.clear()
         currentData.addAll(data)
     }
 
-    fun clearData() {
+    fun updateOriginalData(results: List<SongModel>) {
+        originalData = results
+        updateData(originalData)
+    }
+
+    fun clearCurrentData() {
         currentData.clear()
     }
 
-    fun sortBy(sortPredicate: (SongModel) -> String) {
-        val sorted = originalData.sortedBy(sortPredicate)
-
+    fun clearAllData() {
         currentData.clear()
-        currentData.addAll(sorted)
-
+        originalData = emptyList()
         notifyDataSetChanged()
     }
+
+    fun isEmpty() = currentData.isEmpty()
+
+    fun sort(data: List<SongModel>, predicate: KProperty1<SongModel, String>): List<SongModel> =
+        data.sortedBy(predicate)
+
+    fun filter(data: List<SongModel>, filterValues: MutableCollection<FilterDefinition>) =
+        if (filterValues.isEmpty()) {
+            data
+        } else {
+            data.filter { song -> filterValues.all { filter -> filter(song) } }
+        }
 }
 
 sealed class BaseViewHolder(binding: ViewDataBinding) : RecyclerView.ViewHolder(binding.root)
