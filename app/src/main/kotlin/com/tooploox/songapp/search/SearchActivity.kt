@@ -8,7 +8,6 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.AppCompatRadioButton
 import android.support.v7.widget.RecyclerView
-import android.view.MotionEvent
 import android.view.inputmethod.EditorInfo
 import android.widget.RadioButton
 import android.widget.RadioGroup
@@ -331,13 +330,14 @@ class SearchActivity : AppCompatActivity(), SearchView {
             adapter = listAdapter
         }
 
-        binding.recyclerView.setOnTouchListener { _, event ->
+        binding.recyclerView.onDownClickListener = {
             val input = binding.searchInput
-            if (event.action == MotionEvent.ACTION_MOVE && input.hasFocus()) {
+            if (input.hasFocus()) {
                 input.clearFocus()
                 hideKeyboard(binding.searchInput)
             }
-            false
+
+            hideBottomSheetsIfNeeded(allBottomSheets)
         }
     }
 
