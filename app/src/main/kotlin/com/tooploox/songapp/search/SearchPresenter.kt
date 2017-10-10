@@ -16,7 +16,19 @@ class SearchPresenter(private val dataSourcesMap: Map<DataSource.Type, DataSourc
 
     private val subject = PublishSubject.create<SearchQuery>()
 
-    init {
+    fun handleSearchQuery(query: String, dataSourceEnum: DataSource.Type) {
+        if (query.isEmpty()) {
+            withView {
+                showLoading(false)
+                showInitialEmptyView()
+            }
+        } else {
+            withView { showLoading(true) }
+            subject.onNext(dataSourceEnum to query)
+        }
+    }
+
+    override fun onAttached() {
         subject
             .debounce(400, TimeUnit.MILLISECONDS)
             .switchMap { chooseDataSource(it.first, it.second).toObservable() }
@@ -34,18 +46,6 @@ class SearchPresenter(private val dataSourcesMap: Map<DataSource.Type, DataSourc
                 }
             })
             .addToDisposable(disposables)
-    }
-
-    fun handleSearchQuery(query: String, dataSourceEnum: DataSource.Type) {
-        if (query.isEmpty()) {
-            withView {
-                showLoading(false)
-                showInitialEmptyView()
-            }
-        } else {
-            withView { showLoading(true) }
-            subject.onNext(dataSourceEnum to query)
-        }
     }
 
     @SuppressWarnings("unchecked")

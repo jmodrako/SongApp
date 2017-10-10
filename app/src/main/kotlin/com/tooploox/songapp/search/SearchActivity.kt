@@ -100,6 +100,8 @@ class SearchActivity : AppCompatActivity(), SearchView {
     override fun onStart() {
         super.onStart()
         presenter.attach(this)
+        listAdapter.registerAdapterDataObserver(adapterDataObserver)
+        rxifySearchInput()
     }
 
     override fun onStop() {
@@ -338,8 +340,6 @@ class SearchActivity : AppCompatActivity(), SearchView {
             detailsDialog.show(supportFragmentManager, "details-fragment")
         }
 
-        listAdapter.registerAdapterDataObserver(adapterDataObserver)
-
         binding.recyclerView.run {
             withVerticalManager()
             adapter = listAdapter
@@ -420,6 +420,10 @@ class SearchActivity : AppCompatActivity(), SearchView {
             binding.searchInput.requestFocus()
         }
 
+        rxifySearchInput()
+    }
+
+    private fun rxifySearchInput() {
         RxTextView.textChanges(binding.searchInput)
             .skip(1)
             .map(CharSequence::toString)
