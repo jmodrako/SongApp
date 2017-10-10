@@ -6,7 +6,6 @@ import com.tooploox.songapp.data.DataSource
 import com.tooploox.songapp.data.SongModel
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import java.util.concurrent.TimeUnit
 
@@ -14,7 +13,7 @@ typealias SearchQuery = Pair<DataSource.Type, String>
 
 class SearchPresenter(private val dataSourcesMap: Map<DataSource.Type, DataSource>) : BasePresenter<SearchView>() {
 
-    private val subject = PublishSubject.create<SearchQuery>()
+    private val subject by lazy { PublishSubject.create<SearchQuery>() }
 
     fun handleSearchQuery(query: String, dataSourceEnum: DataSource.Type) {
         if (query.isEmpty()) {
@@ -33,7 +32,6 @@ class SearchPresenter(private val dataSourcesMap: Map<DataSource.Type, DataSourc
             .debounce(400, TimeUnit.MILLISECONDS)
             .switchMap { chooseDataSource(it.first, it.second).toObservable() }
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribeOn(Schedulers.io())
             .subscribe({
                 withView {
                     showLoading(false)
