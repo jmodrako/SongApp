@@ -40,5 +40,12 @@ fun TextView.bold(bold: Boolean = true) {
     this.typeface = if (bold) android.graphics.Typeface.DEFAULT_BOLD else android.graphics.Typeface.DEFAULT
 }
 
-fun RadioGroup.uncheckAllButtons() = views.map { it as RadioButton }.forEach { it.isChecked = false }
+fun RadioGroup.unCheckAllButtons() = views.map { it as RadioButton }.forEach { it.isChecked = false }
 fun RadioGroup.firstCheckedButton() = views.map { it as RadioButton }.first { it.isChecked }
+
+fun RecyclerView.Adapter<*>.safeUnregisterAdapterDataObserver(observer: RecyclerView.AdapterDataObserver) {
+    try {
+        unregisterAdapterDataObserver(observer)
+    } catch (ignored: Exception) {
+    }
+}

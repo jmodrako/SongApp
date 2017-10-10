@@ -28,9 +28,10 @@ import com.tooploox.songapp.common.hideBottomSheetsIfNeeded
 import com.tooploox.songapp.common.hideKeyboard
 import com.tooploox.songapp.common.prepareSpinnerUtil
 import com.tooploox.songapp.common.retype
+import com.tooploox.songapp.common.safeUnregisterAdapterDataObserver
 import com.tooploox.songapp.common.setupInitialBottomSheet
 import com.tooploox.songapp.common.toast
-import com.tooploox.songapp.common.uncheckAllButtons
+import com.tooploox.songapp.common.unCheckAllButtons
 import com.tooploox.songapp.common.views
 import com.tooploox.songapp.common.visible
 import com.tooploox.songapp.common.withVerticalManager
@@ -101,7 +102,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
     }
 
     override fun onStop() {
-        listAdapter.unregisterAdapterDataObserver(adapterDataObserver)
+        listAdapter.safeUnregisterAdapterDataObserver(adapterDataObserver)
         presenter.detach()
         compositeDisposable.clear()
         super.onStop()
@@ -272,7 +273,7 @@ class SearchActivity : AppCompatActivity(), SearchView {
     }
 
     private fun clearSort() {
-        binding.bottomSheetSort.sortRadioGroup.uncheckAllButtons()
+        binding.bottomSheetSort.sortRadioGroup.unCheckAllButtons()
         searchState.clearSort()
         refreshListFromSortBy()
     }
