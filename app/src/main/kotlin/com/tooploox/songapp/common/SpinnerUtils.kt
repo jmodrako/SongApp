@@ -6,14 +6,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Spinner
 import android.widget.TextView
 
 fun prepareSpinnerUtil(
     context: Context,
-    data: List<String>, spinner: Spinner,
+    data: List<String>,
+    spinner: BetterSpinner,
     clickCallback: (String) -> Unit,
     defaultCallback: () -> Unit) {
+
+    spinner.isInitialSelection = true
 
     val adapter = object : ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, android.R.id.text1) {
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
@@ -28,6 +30,11 @@ fun prepareSpinnerUtil(
     spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
         override fun onNothingSelected(parent: AdapterView<*>?) {}
         override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+            if (spinner.isInitialSelection) {
+                spinner.isInitialSelection = false
+                return
+            }
+
             if (position == 0) {
                 defaultCallback()
             } else {
@@ -39,7 +46,7 @@ fun prepareSpinnerUtil(
     }
 }
 
-fun Spinner.clearAdapter() {
+fun BetterSpinner.clearAdapter() {
     if (adapter != null && adapter is ArrayAdapter<*>) {
         (adapter as ArrayAdapter<*>).clear()
     }

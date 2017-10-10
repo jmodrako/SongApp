@@ -75,17 +75,17 @@
 
                 <TextView
                     android:id="@+id/filter"
-                    android:minWidth="100dp"
+                    android:minWidth="96dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@drawable/mini_button_background"
                     android:clickable="true"
                     android:fontFamily="sans-serif"
                     android:gravity="center"
-                    android:padding="8dp"
+                    android:padding="6dp"
                     android:text="@string/filter"
                     android:textColor="@color/primary_text_white"
-                    android:textSize="16sp" />
+                    android:textSize="14sp" />
 
                 <Space
                     android:layout_width="6dp"
@@ -94,16 +94,16 @@
                 <TextView
                     android:id="@+id/sort"
                     android:layout_width="wrap_content"
-                    android:minWidth="100dp"
+                    android:minWidth="96dp"
                     android:layout_height="wrap_content"
                     android:background="@drawable/mini_button_background"
                     android:clickable="true"
                     android:fontFamily="sans-serif"
                     android:gravity="center"
-                    android:padding="8dp"
+                    android:padding="6dp"
                     android:text="@string/sort"
                     android:textColor="@color/primary_text_white"
-                    android:textSize="16sp" />
+                    android:textSize="14sp" />
 
                 <TextView
                     android:id="@+id/search_result_count"

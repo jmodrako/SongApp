@@ -121,16 +121,14 @@ class SearchActivity : AppCompatActivity(), SearchView {
     override fun showSearchResults(results: List<SongModel>) {
         listAdapter.clearCurrentData()
 
-        if (results.isEmpty()) {
-            showResultCountLabel(0)
-            showEmptyLayoutWithMessage(getString(R.string.cant_find_song))
-        } else {
+        if (results.isNotEmpty()) {
             createFilters(results)
-            hideEmptyLayout()
 
-            listAdapter.updateOriginalData(results)
-            listAdapter.notifyDataSetChanged()
+            val sortedData = listAdapter.sort(results, searchState.sortBy)
+            listAdapter.updateOriginalData(sortedData)
         }
+
+        listAdapter.notifyDataSetChanged()
     }
 
     override fun showSearchError() {

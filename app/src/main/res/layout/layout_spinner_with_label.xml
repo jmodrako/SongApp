@@ -26,7 +26,7 @@
             android:textSize="14sp"
             tools:ignore="RtlSymmetry" />
 
-        <Spinner
+        <com.tooploox.songapp.common.BetterSpinner
             android:id="@+id/spinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
